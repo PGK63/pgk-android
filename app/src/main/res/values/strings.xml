@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">PGK</string>
+    <string name="downloading">Загрузка…</string>
+    <string name="title_file_download">PGK app</string>
+    <string name="storage_access_required">Доступ к хранилищу требуется для загрузки файла.</string>
+    <string name="storage_permission_denied">Запрос разрешения на хранение был отклонен.</string>
+    <string name="ok">OK</string>
+</resources>

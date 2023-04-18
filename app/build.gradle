@@ -1,0 +1,115 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'com.google.dagger.hilt.android'
+    id 'com.google.gms.google-services'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.8.10'
+}
+
+android {
+    namespace 'ru.pgk63.pgk'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "ru.pgk63.pgk"
+        minSdk 23
+        targetSdk 33
+        versionCode 5
+        versionName "1.1.4"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion compose_version
+    }
+
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+}
+
+dependencies {
+
+    implementation project(":core:core-ui")
+    implementation project(":core:core-navigation")
+    implementation project(":core:core-database")
+    implementation project(":core:core-network")
+    implementation project(":core:core-services")
+    implementation project(":core:core-common")
+    implementation project(":core:core-model")
+
+    implementation project(":features:feature-main")
+    implementation project(":features:feature-auth")
+    implementation project(":features:feature-group")
+    implementation project(":features:feature-tech-support")
+    implementation project(":features:feature-settings")
+    implementation project(":features:feature-specialization")
+    implementation project(":features:feature-subject")
+    implementation project(":features:feature-student")
+    implementation project(":features:feature-profile")
+    implementation project(":features:feature-department")
+    implementation project(":features:feature-raportichka")
+    implementation project(":features:feature-journal")
+    implementation project(":features:feature-guide")
+
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    implementation 'androidx.activity:activity-compose:1.3.1'
+    implementation "androidx.compose.ui:ui:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
+    implementation "androidx.compose.material:material:$compose_material"
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
+    debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
+
+    //Firebase
+    implementation 'com.google.firebase:firebase-config-ktx:21.2.1'
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.2.0'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.1.1'
+
+    //Navigation
+    implementation("com.google.accompanist:accompanist-navigation-animation:$accompanist_navigation_animation_version")
+
+    //Compose permissions
+    implementation "com.google.accompanist:accompanist-permissions:$accompanist_permissions_version"
+
+    //System ui controller
+    implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_systemuicontroller_version"
+
+    //Kotlin serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+
+    //Download apk
+    implementation 'com.ixuea:android-downloader:3.0.0'
+
+    //Hilt
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    implementation "androidx.hilt:hilt-navigation-compose:$hilt_navigation_compose"
+    kapt "com.google.dagger:hilt-compiler:$hilt_version"
+}

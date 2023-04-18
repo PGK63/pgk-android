@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="testRunner" value="GRADLE" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="11" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core/core-common" />
+            <option value="$PROJECT_DIR$/core/core-database" />
+            <option value="$PROJECT_DIR$/core/core-model" />
+            <option value="$PROJECT_DIR$/core/core-navigation" />
+            <option value="$PROJECT_DIR$/core/core-network" />
+            <option value="$PROJECT_DIR$/core/core-services" />
+            <option value="$PROJECT_DIR$/core/core-ui" />
+            <option value="$PROJECT_DIR$/features" />
+            <option value="$PROJECT_DIR$/features/feature-auth" />
+            <option value="$PROJECT_DIR$/features/feature-department" />
+            <option value="$PROJECT_DIR$/features/feature-group" />
+            <option value="$PROJECT_DIR$/features/feature-guide" />
+            <option value="$PROJECT_DIR$/features/feature-journal" />
+            <option value="$PROJECT_DIR$/features/feature-main" />
+            <option value="$PROJECT_DIR$/features/feature-profile" />
+            <option value="$PROJECT_DIR$/features/feature-raportichka" />
+            <option value="$PROJECT_DIR$/features/feature-settings" />
+            <option value="$PROJECT_DIR$/features/feature-specialization" />
+            <option value="$PROJECT_DIR$/features/feature-student" />
+            <option value="$PROJECT_DIR$/features/feature-subject" />
+            <option value="$PROJECT_DIR$/features/feature-tech-support" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="field_required">Это поле является обязательным</string>
+    <string name="not_number">Не совсем похоже на число</string>
+    <string name="minimum_three_characters">Минимум три символа</string>
+    <string name="incorrect_email">Некорректный email адрес</string>
+    <string name="incorrect_password">Минимум 4 символа</string>
+    <string name="default_value">По умолчанию</string>
+    <string name="cursive">Cursive</string>
+    <string name="serif">Serif</string>
+    <string name="monospace">Monospace</string>
+    <string name="sans_serif">Sans serif</string>
+    <string name="rounded">Округление</string>
+    <string name="flat">Без округления</string>
+    <string name="small">Маленький</string>
+    <string name="medium">Средний</string>
+    <string name="big">Большой</string>
+    <string name="student">Студент</string>
+    <string name="headman">Староста</string>
+    <string name="deputy_headman">Зам старосты</string>
+    <string name="teacher">Преподаватель</string>
+    <string name="educational_sector">Учебный сектор</string>
+    <string name="department_head">Зав отделения</string>
+    <string name="department">Отделения</string>
+    <string name="group">Група</string>
+    <string name="speciality">Спецальность</string>
+    <string name="subject">Предмет</string>
+    <string name="welcome_night">Добрый ночи</string>
+    <string name="welcome_day">Добрый день</string>
+    <string name="welcome_evening">Добрый вечер</string>
+    <string name="welcome_morning">Доброе утро</string>
+    <string name="admin">Админ</string>
+    <string name="director">Директор</string>
+    <string name="today">Сегодня</string>
+    <string name="yesterday">Вчера</string>
+    <string name="tomorrow">Завтра</string>
+    <string name="telegram_security">Telegram-бот добавлен</string>
+    <string name="telegram_insecurity">Telegram-бот не добавлен</string>
+    <string name="email_insecurity">Электронная почта не добавлена</string>
+    <string name="security_email">Безопасность</string>
+    <string name="email_security">Электронная почта добавлена</string>
+    <string name="email_verification">Подтвердите свой адрес электронной почты</string>
+    <string name="image">Изображения</string>
+    <string name="video">Видео</string>
+    <string name="file">Файл</string>
+</resources>

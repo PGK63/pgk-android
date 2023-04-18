@@ -1,0 +1,38 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+rootProject.name = "PGK"
+include ':app'
+include ':core:core-network'
+include ':core:core-common'
+include ':core:core-database'
+include ':core:core-ui'
+include ':core:core-navigation'
+include ':features:feature-main'
+include ':features:feature-auth'
+include ':features:feature-group'
+include ':features:feature-tech-support'
+include ':features:feature-settings'
+include ':features:feature-specialization'
+include ':features:feature-subject'
+include ':features:feature-student'
+include ':features:feature-profile'
+include ':features:feature-department'
+include ':features:feature-raportichka'
+include ':features:feature-journal'
+include ':features:feature-guide'
+include ':core:core-model'
+include ':core:core-services'
