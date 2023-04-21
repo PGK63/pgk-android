@@ -2,9 +2,10 @@ package ru.pgk63.feature_subject.screens.subjectListScreen
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -24,19 +25,19 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import ru.pgk63.core_model.subject.CreateSubjectBody
-import ru.pgk63.core_model.subject.CreateSubjectResponse
-import ru.pgk63.core_model.subject.Subject
 import ru.pgk63.core_common.common.response.Result
 import ru.pgk63.core_common.enums.user.UserRole
 import ru.pgk63.core_common.extension.launchWhenStarted
 import ru.pgk63.core_database.user.model.UserLocalDatabase
-import ru.pgk63.core_ui.view.TopBarBack
+import ru.pgk63.core_model.subject.CreateSubjectBody
+import ru.pgk63.core_model.subject.CreateSubjectResponse
+import ru.pgk63.core_model.subject.Subject
 import ru.pgk63.core_ui.R
 import ru.pgk63.core_ui.paging.items
 import ru.pgk63.core_ui.theme.PgkTheme
 import ru.pgk63.core_ui.view.SubjectItem
 import ru.pgk63.core_ui.view.TextFieldSearch
+import ru.pgk63.core_ui.view.TopBarBack
 import ru.pgk63.core_ui.view.collapsingToolbar.rememberToolbarScrollBehavior
 import ru.pgk63.feature_subject.screens.subjectListScreen.view.CreateSubjectDialog
 import ru.pgk63.feature_subject.screens.subjectListScreen.viewModel.SubjectListViewModel
@@ -101,6 +102,7 @@ internal fun SubjectListRoute(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SubjectListScreen(
     scaffoldState: ScaffoldState,
@@ -189,8 +191,8 @@ private fun SubjectListScreen(
             onCreateSubjectButtonClick = onCreateSubject
         )
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
             modifier = Modifier.fillMaxSize()
         ) {
 
