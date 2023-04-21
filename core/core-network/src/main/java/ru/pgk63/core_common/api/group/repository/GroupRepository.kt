@@ -76,4 +76,8 @@ class GroupRepository @Inject constructor(
     ): StudentResponse = groupApi.getStudentByGroupId(id, pageNumber, pageSize)
 
     suspend fun createRaportichka(groupId:Int) = safeApiCall { groupApi.createRaportichka(groupId) }
+
+    suspend fun updateCourse(groupId: Int, course: Int) = safeApiCall {
+        groupApi.updateCourse(groupId, course)
+    }
 }

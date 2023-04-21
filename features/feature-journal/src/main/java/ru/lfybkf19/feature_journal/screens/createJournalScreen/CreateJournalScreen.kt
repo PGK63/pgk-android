@@ -20,12 +20,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.flow.onEach
-import ru.lfybkf19.feature_journal.navigation.onJournalSubjectListScreen
 import ru.lfybkf19.feature_journal.screens.createJournalScreen.viewModel.CreateJournalViewModel
 import ru.pgk63.core_common.common.response.Result
 import ru.pgk63.core_common.extension.launchWhenStarted
 import ru.pgk63.core_common.validation.numberValidation
 import ru.pgk63.core_model.journal.Journal
+import ru.pgk63.core_navigation.`typealias`.onJournalSubjectListScreen
 import ru.pgk63.core_ui.R
 import ru.pgk63.core_ui.theme.PgkTheme
 import ru.pgk63.core_ui.view.NextButton

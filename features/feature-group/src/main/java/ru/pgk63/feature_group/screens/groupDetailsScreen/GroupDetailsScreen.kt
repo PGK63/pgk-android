@@ -1,6 +1,7 @@
 package ru.pgk63.feature_group.screens.groupDetailsScreen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,11 +21,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ru.pgk63.core_model.group.Group
 import ru.pgk63.core_model.journal.Journal
 import ru.pgk63.core_common.api.speciality.model.Specialization
@@ -34,14 +37,18 @@ import ru.pgk63.core_common.extension.launchWhenStarted
 import ru.pgk63.core_common.common.response.Result
 import ru.pgk63.core_common.enums.user.UserRole
 import ru.pgk63.core_database.user.model.UserLocalDatabase
+import ru.pgk63.core_navigation.`typealias`.onJournalSubjectListScreen
 import ru.pgk63.core_ui.R
 import ru.pgk63.core_ui.paging.items
 import ru.pgk63.core_ui.theme.PgkTheme
 import ru.pgk63.core_ui.view.*
 import ru.pgk63.core_ui.view.collapsingToolbar.rememberToolbarScrollBehavior
 import ru.pgk63.core_ui.view.metaBalls.comonents.LoadingUi
+import ru.pgk63.feature_group.screens.groupDetailsScreen.model.GroupDetailsBottomDrawerContentState
 import ru.pgk63.feature_group.screens.groupDetailsScreen.model.GroupDetailsMenu
 import ru.pgk63.feature_group.screens.groupDetailsScreen.viewModel.GroupDetailsViewModel
+import java.lang.Math.round
+import kotlin.math.roundToInt
 
 @SuppressLint("FlowOperatorInvokedInComposition")
 @Composable
@@ -54,13 +61,7 @@ internal fun GroupDetailsRoute(
     onSpecializationDetailsScreen: (specializationId: Int) -> Unit,
     onRegistrationHeadman: (groupId: Int,deputy: Boolean) -> Unit,
     onRegistrationStudentScreen: (groupId: Int) -> Unit,
-    onJournalScreen: (
-        journalId: Int,
-        course: Int,
-        semester: Int,
-        group: String,
-        groupId: Int,
-    ) -> Unit,
+    onJournalSubjectListScreen: onJournalSubjectListScreen,
     onCreateJournalScreen: (groupId: Int) -> Unit,
     onTeacherDetailScreen: (teacherId: Int) -> Unit
 ) {
@@ -93,6 +94,7 @@ internal fun GroupDetailsRoute(
     GroupDetailsScreen(
         groupResult = groupResult,
         user = user,
+        groupId = groupId,
         journalList = journalList,
         onBackScreen = onBackScreen,
         students = students,
@@ -100,7 +102,7 @@ internal fun GroupDetailsRoute(
         onDepartmentDetailsScreen = onDepartmentDetailsScreen,
         onSpecializationDetailsScreen = onSpecializationDetailsScreen,
         onRegistrationStudentScreen = onRegistrationStudentScreen,
-        onJournalScreen = onJournalScreen,
+        onJournalScreen = onJournalSubjectListScreen,
         onCreateJournalScreen = onCreateJournalScreen,
         onTeacherDetailScreen = onTeacherDetailScreen,
         onRegistrationHeadman = { deputy ->
@@ -108,14 +110,19 @@ internal fun GroupDetailsRoute(
         },
         deleteGroup = {
             viewModel.deleteGroupById(groupId)
+        },
+        updateCourse = { course ->
+            viewModel.updateCourse(groupId, course)
         }
     )
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun GroupDetailsScreen(
     groupResult: Result<Group>,
     user: UserLocalDatabase,
+    groupId: Int,
     students: LazyPagingItems<Student>,
     journalList: LazyPagingItems<Journal>,
     onBackScreen: () -> Unit,
@@ -124,19 +131,19 @@ private fun GroupDetailsScreen(
     onSpecializationDetailsScreen: (specializationId: Int) -> Unit,
     onRegistrationHeadman: (deputy: Boolean) -> Unit,
     onRegistrationStudentScreen: (groupId: Int) -> Unit,
-    onJournalScreen: (
-        journalId: Int,
-        course: Int,
-        semester: Int,
-        group: String,
-        groupId: Int,
-    ) -> Unit,
+    onJournalScreen: onJournalSubjectListScreen,
     deleteGroup: () -> Unit,
     onCreateJournalScreen: (groupId: Int) -> Unit,
-    onTeacherDetailScreen: (teacherId: Int) -> Unit
+    onTeacherDetailScreen: (teacherId: Int) -> Unit,
+    updateCourse: (course: Int) -> Unit
 ) {
     val scrollBehavior = rememberToolbarScrollBehavior()
+    val scope = rememberCoroutineScope()
     var mainMenuVisible by remember { mutableStateOf(false) }
+    val bottomDrawerState = rememberBottomDrawerState(initialValue = BottomDrawerValue.Closed)
+    var bottomDrawerContentState by remember {
+        mutableStateOf<GroupDetailsBottomDrawerContentState>(GroupDetailsBottomDrawerContentState.Empty)
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -169,7 +176,7 @@ private fun GroupDetailsScreen(
                                 when(menu){
                                     GroupDetailsMenu.ADD_STUDENT,
                                     GroupDetailsMenu.CREATE_JOURNAL,
-                                    GroupDetailsMenu.DELETE_GROUP -> {
+                                    GroupDetailsMenu.DELETE_GROUP, GroupDetailsMenu.UPDATE_COURSE  -> {
                                         user.userRole == UserRole.ADMIN
                                                 || user.userRole == UserRole.EDUCATIONAL_SECTOR
                                                 || (user.userRole == UserRole.TEACHER
@@ -197,6 +204,14 @@ private fun GroupDetailsScreen(
                                     }
                                 }
                                 GroupDetailsMenu.DELETE_GROUP -> deleteGroup()
+                                GroupDetailsMenu.UPDATE_COURSE -> {
+                                    scope.launch {
+                                        bottomDrawerContentState = GroupDetailsBottomDrawerContentState.UpdateCourse(
+                                            groupId = groupId
+                                        )
+                                        bottomDrawerState.open()
+                                    }
+                                }
                             }
                         }
                     }
@@ -208,111 +223,130 @@ private fun GroupDetailsScreen(
                 is Result.Error -> ErrorUi(message = groupResult.message)
                 is Result.Loading -> LoadingUi()
                 is Result.Success -> {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-
-                        item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                            Column {
-                                Spacer(modifier = Modifier.height(10.dp))
-
-                                ClassroomTeacherUi(
-                                    classroomTeacher = groupResult.data!!.classroomTeacher,
-                                    onTeacherDetailScreen = onTeacherDetailScreen
-                                )
-                            }
-                        }
-
-                        item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                            Column {
-                                Spacer(modifier = Modifier.height(10.dp))
-
-                                DepartmentAndSpecialityUi(
-                                    department = groupResult.data!!.speciality.department,
-                                    speciality = groupResult.data!!.speciality,
-                                    onClickDepartment = {
-                                        onDepartmentDetailsScreen(groupResult.data!!.speciality.department.id)
-                                    },
-                                    onClickSpecialization = {
-                                        onSpecializationDetailsScreen(groupResult.data!!.speciality.id)
+                    BottomDrawer(
+                        drawerState = bottomDrawerState,
+                        drawerBackgroundColor = PgkTheme.colors.secondaryBackground,
+                        drawerShape = PgkTheme.shapes.cornersStyle,
+                        gesturesEnabled = bottomDrawerState.isOpen,
+                        drawerContent = {
+                            BottomDrawerContent(
+                                bottomDrawerContentState = bottomDrawerContentState,
+                                updateCourse = {
+                                    scope.launch {
+                                        updateCourse(it)
+                                        bottomDrawerState.close()
                                     }
-                                )
-                            }
+                                },
+                                currentCourse = groupResult.data!!.course
+                            )
                         }
+                    ){
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
 
-                        item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                            Column {
-                                if(journalList.itemCount > 0 ){
-                                    Spacer(modifier = Modifier.height(25.dp))
+                            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                                Column {
+                                    Spacer(modifier = Modifier.height(10.dp))
 
-                                    Text(
-                                        text = stringResource(id = R.string.journals),
-                                        color = PgkTheme.colors.primaryText,
-                                        style = PgkTheme.typography.heading,
-                                        fontFamily = PgkTheme.fontFamily.fontFamily,
-                                        modifier = Modifier.padding(start = 20.dp)
+                                    ClassroomTeacherUi(
+                                        classroomTeacher = groupResult.data!!.classroomTeacher,
+                                        onTeacherDetailScreen = onTeacherDetailScreen
                                     )
+                                }
+                            }
 
-                                    Spacer(modifier = Modifier.height(5.dp))
+                            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                                Column {
+                                    Spacer(modifier = Modifier.height(10.dp))
 
-                                    LazyRow {
-                                        items(journalList) { journal ->
-                                            if(journal != null){
-                                                JournalUi(
-                                                    group = journal.group.toString(),
-                                                    course = journal.course.toString(),
-                                                    semester = journal.semester.toString(),
-                                                    modifier = Modifier.padding(5.dp),
-                                                    onClick = {
-                                                        onJournalScreen(
-                                                            journal.id,
-                                                            journal.course,
-                                                            journal.semester,
-                                                            journal.group.toString(),
-                                                            journal.group.id
-                                                        )
-                                                    }
-                                                )
+                                    DepartmentAndSpecialityUi(
+                                        department = groupResult.data!!.speciality.department,
+                                        speciality = groupResult.data!!.speciality,
+                                        onClickDepartment = {
+                                            onDepartmentDetailsScreen(groupResult.data!!.speciality.department.id)
+                                        },
+                                        onClickSpecialization = {
+                                            onSpecializationDetailsScreen(groupResult.data!!.speciality.id)
+                                        }
+                                    )
+                                }
+                            }
+
+                            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                                Column {
+                                    if(journalList.itemCount > 0 ){
+                                        Spacer(modifier = Modifier.height(25.dp))
+
+                                        Text(
+                                            text = stringResource(id = R.string.journals),
+                                            color = PgkTheme.colors.primaryText,
+                                            style = PgkTheme.typography.heading,
+                                            fontFamily = PgkTheme.fontFamily.fontFamily,
+                                            modifier = Modifier.padding(start = 20.dp)
+                                        )
+
+                                        Spacer(modifier = Modifier.height(5.dp))
+
+                                        LazyRow {
+                                            items(journalList) { journal ->
+                                                if(journal != null){
+                                                    JournalUi(
+                                                        group = journal.group.toString(),
+                                                        course = journal.course.toString(),
+                                                        semester = journal.semester.toString(),
+                                                        modifier = Modifier.padding(5.dp),
+                                                        onClick = {
+                                                            onJournalScreen(
+                                                                journal.id,
+                                                                journal.course,
+                                                                journal.semester,
+                                                                journal.group.toString(),
+                                                                journal.group.id
+                                                            )
+                                                        }
+                                                    )
+                                                }
                                             }
                                         }
+
+                                        Spacer(modifier = Modifier.height(15.dp))
                                     }
-
-                                    Spacer(modifier = Modifier.height(15.dp))
                                 }
                             }
-                        }
 
-                        item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                            Column {
-                                if(students.itemCount > 0 ){
-                                    Spacer(modifier = Modifier.height(25.dp))
+                            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                                Column {
+                                    if(students.itemCount > 0 ){
+                                        Spacer(modifier = Modifier.height(25.dp))
 
-                                    Text(
-                                        text = stringResource(id = R.string.students),
-                                        color = PgkTheme.colors.primaryText,
-                                        style = PgkTheme.typography.heading,
-                                        fontFamily = PgkTheme.fontFamily.fontFamily,
-                                        modifier = Modifier.padding(start = 20.dp)
+                                        Text(
+                                            text = stringResource(id = R.string.students),
+                                            color = PgkTheme.colors.primaryText,
+                                            style = PgkTheme.typography.heading,
+                                            fontFamily = PgkTheme.fontFamily.fontFamily,
+                                            modifier = Modifier.padding(start = 20.dp)
+                                        )
+
+                                        Spacer(modifier = Modifier.height(15.dp))
+                                    }
+                                }
+                            }
+
+                            items(students){ student ->
+                                student?.let {
+                                    StudentCard(
+                                        group = groupResult.data!!,
+                                        student = student,
+                                        onClick = onStudentDetailsScreen
                                     )
-
-                                    Spacer(modifier = Modifier.height(15.dp))
                                 }
                             }
-                        }
 
-                        items(students){ student ->
-                            student?.let {
-                                StudentCard(
-                                    group = groupResult.data!!,
-                                    student = student,
-                                    onClick = onStudentDetailsScreen
-                                )
+                            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                                Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
                             }
-                        }
-
-                        item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                            Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
                         }
                     }
                 }
@@ -361,6 +395,99 @@ private fun MainMenu(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BottomDrawerContent(
+    bottomDrawerContentState: GroupDetailsBottomDrawerContentState,
+    currentCourse: Int,
+    updateCourse: (course: Int) -> Unit
+) {
+    when(bottomDrawerContentState) {
+        GroupDetailsBottomDrawerContentState.Empty -> EmptyUi()
+        is GroupDetailsBottomDrawerContentState.UpdateCourse -> UpdateCourseUi(
+            updateCourse = updateCourse,
+            currentCourse = currentCourse
+        )
+    }
+}
+
+@Composable
+private fun UpdateCourseUi(
+    currentCourse: Int,
+    updateCourse: (course: Int) -> Unit
+) {
+    var course by remember { mutableStateOf(1) }
+
+    LaunchedEffect(key1 = Unit, block = {
+        course = currentCourse
+    })
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = stringResource(id = R.string.update_course),
+            color = PgkTheme.colors.primaryText,
+            style = PgkTheme.typography.heading,
+            fontFamily = PgkTheme.fontFamily.fontFamily,
+            modifier = Modifier
+                .padding(5.dp)
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = course.toString(),
+            color = PgkTheme.colors.primaryText,
+            style = PgkTheme.typography.heading,
+            fontFamily = PgkTheme.fontFamily.fontFamily,
+            modifier = Modifier
+                .padding(5.dp)
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            fontSize = 50.sp,
+        )
+
+        Slider(
+            value = course.toFloat(),
+            onValueChange = {
+                val changed = it.roundToInt()
+
+                course = when (changed) {
+                    0 -> 1
+                    6 -> 5
+                    else -> changed
+                }
+            },
+            valueRange = 0f..6f,
+            steps = 5,
+            colors = SliderDefaults.colors(
+                activeTrackColor = PgkTheme.colors.tintColor,
+                thumbColor = PgkTheme.colors.tintColor,
+            )
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        TextButton(onClick = { updateCourse(course) }) {
+            Text(
+                text = stringResource(id = R.string.save),
+                color = PgkTheme.colors.tintColor,
+                style = PgkTheme.typography.body,
+                fontFamily = PgkTheme.fontFamily.fontFamily,
+                modifier = Modifier
+                    .padding(5.dp)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 

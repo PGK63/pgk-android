@@ -178,13 +178,13 @@ fun NavGraphBuilder.mainNavGraphBuilder(
                         "&${RegistrationUserDestination.groupId}=$groupId"
             )
         },
-        onJournalScreen = { id, course, semester, group, groupId ->
+        onJournalSubjectListScreen = { id, course, semester, group, groupId ->
             navController.navigate(
-                "${JournalDetailsDestination.route}/$id?" +
-                        "${JournalDetailsDestination.course}=$course&" +
-                        "${JournalDetailsDestination.semester}=$semester&" +
-                        "${JournalDetailsDestination.group}=$group&" +
-                        "${JournalDetailsDestination.groupId}=$groupId"
+                "${JournalSubjectListDestination.route}/$id?" +
+                        "${JournalSubjectListDestination.course}=$course&" +
+                        "${JournalSubjectListDestination.semester}=$semester&" +
+                        "${JournalSubjectListDestination.group}=$group&" +
+                        "${JournalSubjectListDestination.groupId}=$groupId"
             )
         },
         onCreateJournalScreen = { groupId ->

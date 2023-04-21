@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.google.accompanist.navigation.animation.composable
 import ru.pgk63.core_navigation.NavigationDestination
+import ru.pgk63.core_navigation.`typealias`.onJournalSubjectListScreen
 import ru.pgk63.feature_group.screens.createGroupScreen.CreateGroupRoute
 import ru.pgk63.feature_group.screens.groupDetailsScreen.GroupDetailsRoute
 import ru.pgk63.feature_group.screens.groupListScreen.GroupListRoute
@@ -33,13 +34,7 @@ fun NavGraphBuilder.groupNavigation(
     onRegistrationHeadman: (groupId: Int,deputy: Boolean) -> Unit,
     onCreateGroupScreen: () -> Unit,
     onRegistrationStudentScreen: (groupId: Int) -> Unit,
-    onJournalScreen: (
-        journalId: Int,
-        course: Int,
-        semester: Int,
-        group: String,
-        groupId: Int,
-    ) -> Unit,
+    onJournalSubjectListScreen: onJournalSubjectListScreen,
     onCreateJournalScreen: (groupId: Int) -> Unit,
     onTeacherDetailScreen: (teacherId: Int) -> Unit
 ) {
@@ -71,7 +66,7 @@ fun NavGraphBuilder.groupNavigation(
            onSpecializationDetailsScreen = onSpecializationDetailsScreen,
            onRegistrationHeadman = onRegistrationHeadman,
            onRegistrationStudentScreen = onRegistrationStudentScreen,
-           onJournalScreen = onJournalScreen,
+           onJournalSubjectListScreen = onJournalSubjectListScreen,
            onCreateJournalScreen = onCreateJournalScreen,
            onTeacherDetailScreen = onTeacherDetailScreen
        )

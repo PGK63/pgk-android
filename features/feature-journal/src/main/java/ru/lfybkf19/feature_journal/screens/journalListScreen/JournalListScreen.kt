@@ -21,7 +21,6 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.launch
-import ru.lfybkf19.feature_journal.navigation.onJournalSubjectListScreen
 import ru.lfybkf19.feature_journal.screens.journalListScreen.model.JournalListBottomDrawerType
 import ru.lfybkf19.feature_journal.screens.journalListScreen.viewModel.JournalListViewModel
 import ru.pgk63.core_model.department.Department
@@ -30,6 +29,7 @@ import ru.pgk63.core_model.journal.Journal
 import ru.pgk63.core_common.api.speciality.model.Specialization
 import ru.pgk63.core_common.compose.rememberMutableStateListOf
 import ru.pgk63.core_database.room.database.journal.model.JournalEntityListItem
+import ru.pgk63.core_navigation.`typealias`.onJournalSubjectListScreen
 import ru.pgk63.core_ui.R
 import ru.pgk63.core_ui.paging.items
 import ru.pgk63.core_ui.theme.PgkTheme

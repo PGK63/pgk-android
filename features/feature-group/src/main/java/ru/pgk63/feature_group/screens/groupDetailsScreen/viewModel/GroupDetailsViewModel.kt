@@ -22,7 +22,7 @@ import javax.inject.Inject
 class GroupDetailsViewModel @Inject constructor(
     private val groupRepository: GroupRepository,
     private val journalRepository: JournalRepository,
-    private val userDataSource: UserDataSource
+    userDataSource: UserDataSource
 ): ViewModel() {
 
     private val _responseGroup = MutableStateFlow<Result<Group>>(Result.Loading())
@@ -66,6 +66,17 @@ class GroupDetailsViewModel @Inject constructor(
     fun deleteGroupById(id: Int){
         viewModelScope.launch {
             _responseDeleteGroupResult.value = groupRepository.deleteById(id)
+        }
+    }
+
+    fun updateCourse(groupId: Int, course: Int) {
+        viewModelScope.launch {
+            val response = groupRepository.updateCourse(groupId, course)
+
+            if(response is Result.Success) {
+                _responseGroup.value = Result.Loading()
+                getGroupById(groupId)
+            }
         }
     }
 }

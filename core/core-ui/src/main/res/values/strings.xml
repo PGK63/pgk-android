@@ -131,6 +131,7 @@
     <string name="search_iskat">Искать</string>
     <string name="page">Страница</string>
     <string name="add">Добавить</string>
+    <string name="save">Сохранить</string>
     <string name="add_director">Добавить директора</string>
     <string name="add_department_head">Добавить заведущего отделением</string>
     <string name="add_teacher">Добавить преподавателя</string>
@@ -165,6 +166,7 @@
     <string name="scd_calendar_dialog_select_year">Выберите год</string>
     <string name="semester">Семестр</string>
     <string name="course">Курс</string>
+    <string name="update_course">Изменить курс</string>
     <string name="sorting">Сортирока</string>
     <string name="forgot_password">Забыл пароль</string>
     <string name="email_or_telegram_question">Привязывали ли вы свой аккаунт к Email или Телеграм ?</string>

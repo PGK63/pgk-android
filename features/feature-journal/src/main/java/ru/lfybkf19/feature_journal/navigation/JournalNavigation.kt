@@ -12,19 +12,13 @@ import ru.lfybkf19.feature_journal.screens.journalListScreen.JournalListRoute
 import ru.lfybkf19.feature_journal.screens.journalSubjectListScreen.JournalSubjectListRoute
 import ru.lfybkf19.feature_journal.screens.journalTopicTableScreen.JournalTopicTableRoute
 import ru.pgk63.core_navigation.NavigationDestination
+import ru.pgk63.core_navigation.`typealias`.onJournalDetailsScreen
+import ru.pgk63.core_navigation.`typealias`.onJournalSubjectListScreen
 
 object JournalListDestination : NavigationDestination {
     override val route = "journal_list_screen"
     const val groupId = "groupId"
 }
-
-typealias onJournalSubjectListScreen = (
-    journalId: Int,
-    course: Int,
-    semester: Int,
-    group: String,
-    groupId: Int,
-) -> Unit
 
 object JournalSubjectListDestination : NavigationDestination {
     override val route = "journal_subject_list_screen"
@@ -34,19 +28,6 @@ object JournalSubjectListDestination : NavigationDestination {
     const val group = "group"
     const val groupId = "groupId"
 }
-
-typealias onJournalDetailsScreen = (
-    journalId: Int,
-    course: Int,
-    semester: Int,
-    group: String,
-    groupId: Int,
-    journalSubjectId: Int,
-    subjectTitle: String,
-    subjectTeacher: String,
-    subjectHorse: Int,
-    subjectTeacherId: Int,
-) -> Unit
 
 object JournalDetailsDestination : NavigationDestination {
     override val route = "journal_details_screen"

@@ -22,13 +22,13 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.flow.onEach
-import ru.lfybkf19.feature_journal.navigation.onJournalDetailsScreen
-import ru.pgk63.core_ui.R
 import ru.lfybkf19.feature_journal.screens.journalSubjectListScreen.viewModel.JournalSubjectListViewModel
 import ru.pgk63.core_common.enums.user.UserRole
 import ru.pgk63.core_common.extension.launchWhenStarted
 import ru.pgk63.core_model.journal.JournalSubject
 import ru.pgk63.core_navigation.LocalNavController
+import ru.pgk63.core_navigation.`typealias`.onJournalDetailsScreen
+import ru.pgk63.core_ui.R
 import ru.pgk63.core_ui.theme.PgkTheme
 import ru.pgk63.core_ui.view.EmptyUi
 import ru.pgk63.core_ui.view.ErrorUi
