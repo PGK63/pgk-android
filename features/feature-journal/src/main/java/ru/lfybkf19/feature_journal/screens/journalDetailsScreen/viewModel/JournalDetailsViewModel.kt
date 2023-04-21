@@ -18,9 +18,7 @@ import ru.pgk63.core_common.common.response.Result
 import ru.pgk63.core_database.room.database.journal.dataSource.JournalDataSource
 import ru.pgk63.core_database.user.UserDataSource
 import ru.pgk63.core_database.user.model.UserLocalDatabase
-import ru.pgk63.core_model.journal.CreateJournalColumnBody
-import ru.pgk63.core_model.journal.JournalEvaluation
-import ru.pgk63.core_model.journal.JournalSubject
+import ru.pgk63.core_model.journal.*
 import ru.pgk63.core_model.student.Student
 import javax.inject.Inject
 
@@ -35,8 +33,8 @@ internal class JournalDetailsViewModel @Inject constructor(
     val userLocal = userDataSource.get()
         .stateIn(viewModelScope, SharingStarted.Eagerly, UserLocalDatabase())
 
-    private val _responseJournalSubjectsList = MutableStateFlow<PagingData<JournalSubject>>(PagingData.empty())
-    val responseJournalSubjectsList = _responseJournalSubjectsList.asStateFlow()
+    private val _responseJournalRowList = MutableStateFlow<PagingData<JournalRow>>(PagingData.empty())
+    val responseJournalRowList = _responseJournalRowList.asStateFlow()
 
     private val _responseStudentList = MutableStateFlow<PagingData<Student>>(PagingData.empty())
     val responseStudentList = _responseStudentList.asStateFlow()
@@ -44,8 +42,11 @@ internal class JournalDetailsViewModel @Inject constructor(
     private val _responseJournalResult = MutableStateFlow<Result<Unit?>?>(null)
     val responseJournalResult = _responseJournalResult.asStateFlow()
 
-    private val _responseJournalExistsDatabase = MutableStateFlow<Boolean>(false)
+    private val _responseJournalExistsDatabase = MutableStateFlow(false)
     val responseJournalExistsDatabase = _responseJournalExistsDatabase.asStateFlow()
+
+    private val _responseJournalTopics = MutableStateFlow<PagingData<JournalTopic>>(PagingData.empty())
+    val responseJournalTopics = _responseJournalTopics.asStateFlow()
 
     fun updateLocalJournal(
         journalId: Int,
@@ -113,22 +114,31 @@ internal class JournalDetailsViewModel @Inject constructor(
         }
     }
 
-    fun getJournalSubjects(
-        journalId:Int? = null,
-        network: Boolean
-    ) {
+//    fun getJournalSubjects(
+//        journalId:Int? = null,
+//        network: Boolean
+//    ) {
+//        viewModelScope.launch {
+//            if(network){
+//                journalRepository.getJournalSubjects(
+//                    journalId = journalId
+//                ).cachedIn(viewModelScope).collect {
+//                    _responseJournalRowList.value = it
+//                }
+//            }else if(journalId != null){
+//                journalDataSource.getSubjectList(journalId).collect {
+//                    _responseJournalSubjectsList.value = PagingData.from(it)
+//                }
+//            }
+//        }
+//    }
+
+    fun getJournalRowAll(journalSubjectId: Int, network: Boolean) {
         viewModelScope.launch {
-            if(network){
-                journalRepository.getJournalSubjects(
-                    journalId = journalId
-                ).cachedIn(viewModelScope).collect {
-                    _responseJournalSubjectsList.value = it
+            journalRepository.getJournalRow(journalSubjectId)
+                .cachedIn(viewModelScope).collect {
+                    _responseJournalRowList.value = it
                 }
-            }else if(journalId != null){
-                journalDataSource.getSubjectList(journalId).collect {
-                    _responseJournalSubjectsList.value = PagingData.from(it)
-                }
-            }
         }
     }
 
@@ -179,6 +189,15 @@ internal class JournalDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             _responseJournalResult.value = Result.Loading()
             _responseJournalResult.value = journalRepository.deleteColumn(id)
+        }
+    }
+
+    fun getTopics(journalSubjectId: Int) {
+        viewModelScope.launch {
+            journalRepository.getJournalTopics(journalSubjectId)
+                .cachedIn(viewModelScope).collect {
+                    _responseJournalTopics.value = it
+                }
         }
     }
 }

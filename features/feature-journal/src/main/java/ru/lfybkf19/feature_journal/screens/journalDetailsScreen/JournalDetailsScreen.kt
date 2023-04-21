@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -24,28 +23,20 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemsIndexed
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.VerticalPager
-import com.google.accompanist.pager.rememberPagerState
+import androidx.paging.compose.items
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import ru.lfybkf19.feature_journal.screens.journalDetailsScreen.model.JournalDetailsBottomDrawerType
 import ru.lfybkf19.feature_journal.screens.journalDetailsScreen.model.JournalDetailsMenu
 import ru.lfybkf19.feature_journal.screens.journalDetailsScreen.viewModel.JournalDetailsViewModel
 import ru.lfybkf19.feature_journal.view.JournalTableUi
-import ru.pgk63.core_model.journal.CreateJournalColumnBody
-import ru.pgk63.core_model.journal.JournalEvaluation
-import ru.pgk63.core_model.journal.JournalSubject
-import ru.pgk63.core_model.journal.JournalTopic
-import ru.pgk63.core_model.student.Student
 import ru.pgk63.core_common.common.response.Result
 import ru.pgk63.core_common.enums.user.UserRole
 import ru.pgk63.core_common.extension.launchWhenStarted
 import ru.pgk63.core_common.extension.parseToBaseDateFormat
 import ru.pgk63.core_common.extension.parseToNetworkFormat
 import ru.pgk63.core_common.extension.toDate
+import ru.pgk63.core_model.journal.*
+import ru.pgk63.core_model.student.Student
 import ru.pgk63.core_ui.R
 import ru.pgk63.core_ui.theme.PgkTheme
 import ru.pgk63.core_ui.view.EmptyUi
@@ -58,26 +49,30 @@ import ru.pgk63.core_ui.view.metaBalls.comonents.LoadingUi
 import java.util.*
 
 @SuppressLint("FlowOperatorInvokedInComposition")
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun JournalDetailsRoute(
     viewModel: JournalDetailsViewModel = hiltViewModel(),
     journalId: Int,
+    journalSubjectId: Int,
+    subjectTitle: String,
+    subjectTeacher: String,
+    subjectHorse: Int,
+    subjectTeacherId: Int,
     course: Int,
     semester: Int,
     group: String,
     groupId: Int,
     onJournalTopicTableScreen: (journalSubjectId: Int, maxSubjectHours: Int, teacherId: Int) -> Unit,
     onBackScreen: () -> Unit,
-    onCreateJournalSubjectScreen: (journalId: Int) -> Unit,
     onStudentDetailsScreen: (studentId: Int) -> Unit
 ) {
     val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
-    val pagerState = rememberPagerState()
 
     val students = viewModel.responseStudentList.collectAsLazyPagingItems()
-    val journalSubjects = viewModel.responseJournalSubjectsList.collectAsLazyPagingItems()
+    val journalRowList = viewModel.responseJournalRowList.collectAsLazyPagingItems()
+    val journalTopics = viewModel.responseJournalTopics.collectAsLazyPagingItems()
     var userRole by remember { mutableStateOf<UserRole?>(null) }
     var userId by remember { mutableStateOf<Int?>(null) }
     var journalResponse by remember { mutableStateOf<Result<Unit?>?>(null) }
@@ -105,19 +100,19 @@ internal fun JournalDetailsRoute(
         viewModel.journalExistsDatabase(journalId)
     })
 
-    LaunchedEffect(journalExistsDatabase, journalSubjects.itemCount, students.itemCount){
-        if(journalExistsDatabase) {
-            viewModel.updateLocalJournal(
-                journalId = journalId,
-                semester = semester,
-                course = course,
-                group = group,
-                groupId = groupId,
-                journalSubject = journalSubjects.itemSnapshotList.items,
-                studentList = students.itemSnapshotList.items
-            )
-        }
-    }
+//    LaunchedEffect(journalExistsDatabase, journalRowList.itemCount, students.itemCount){
+//        if(journalExistsDatabase) {
+//            viewModel.updateLocalJournal(
+//                journalId = journalId,
+//                semester = semester,
+//                course = course,
+//                group = group,
+//                groupId = groupId,
+//                journalSubject = journalRowList.itemSnapshotList.items,
+//                studentList = students.itemSnapshotList.items
+//            )
+//        }
+//    }
 
     LaunchedEffect(networkModeData, block = {
 
@@ -127,8 +122,8 @@ internal fun JournalDetailsRoute(
             network = networkModeData
         )
 
-        viewModel.getJournalSubjects(
-            journalId = journalId,
+        viewModel.getJournalRowAll(
+            journalSubjectId = journalSubjectId,
             network = networkModeData
         )
     })
@@ -156,7 +151,7 @@ internal fun JournalDetailsRoute(
             }
             is Result.Loading -> Unit
             is Result.Success -> {
-                journalSubjects.refresh()
+                journalRowList.refresh()
                 journalDetailsBottomDrawerType = null
 
                 Toast.makeText(context, context.getString(R.string.success), Toast.LENGTH_SHORT).show()
@@ -169,20 +164,24 @@ internal fun JournalDetailsRoute(
 
     JournalDetailsScreen(
         scaffoldState = scaffoldState,
-        pagerState = pagerState,
+        bottomDrawerState = bottomDrawerState,
         networkModeData = networkModeData,
         journalExistsDatabase = journalExistsDatabase,
-        bottomDrawerState = bottomDrawerState,
-        journalResponse = journalResponse,
-        userId = userId,
-        userRole = userRole,
         journalDetailsBottomDrawerType = journalDetailsBottomDrawerType,
-        journalSubjects = journalSubjects,
+        journalTopics = journalTopics,
+        userRole = userRole,
+        userId = userId,
+        subjectTeacher = subjectTeacher,
+        subjectHorse = subjectHorse,
+        subjectTitle = subjectTitle,
+        journalSubjectId = journalSubjectId,
+        subjectTeacherId = subjectTeacherId,
+        journalResponse = journalResponse,
+        journalRowList = journalRowList,
+        students = students,
         onJournalTopicTableScreen = onJournalTopicTableScreen,
         onBackScreen = onBackScreen,
         onStudentDetailsScreen = onStudentDetailsScreen,
-        onCreateJournalSubjectScreen = { onCreateJournalSubjectScreen(journalId) },
-        students = students,
         onAddColumn = {
             viewModel.createColumn(it)
         },
@@ -196,106 +195,74 @@ internal fun JournalDetailsRoute(
             journalDetailsBottomDrawerType = it
         },
         saveLocalJournal = {
-            viewModel.saveLocalJournal(
-                journalId = journalId,
-                semester = semester,
-                course = course,
-                group = group,
-                groupId = groupId,
-                journalSubject = journalSubjects.itemSnapshotList.items,
-                studentList = students.itemSnapshotList.items
-            )
+//            viewModel.saveLocalJournal(
+//                journalId = journalId,
+//                semester = semester,
+//                course = course,
+//                group = group,
+//                groupId = groupId,
+//                journalSubject = journalRowList.itemSnapshotList.items,
+//                studentList = students.itemSnapshotList.items
+//            )
+        },
+        onNetworkDataChange = {
+            networkModeData = it
+        },
+        getJournalTopics = {
+            if(journalTopics.itemCount == 0)
+                viewModel.getTopics(journalSubjectId)
         }
-    ) { networkModeData = it }
+    )
 }
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun JournalDetailsScreen(
     scaffoldState: ScaffoldState,
     bottomDrawerState: BottomDrawerState,
-    pagerState: PagerState,
     networkModeData: Boolean,
     journalExistsDatabase: Boolean,
     journalDetailsBottomDrawerType: JournalDetailsBottomDrawerType?,
     userRole: UserRole?,
     userId: Int?,
+    subjectTitle: String,
+    subjectTeacher: String,
+    journalSubjectId: Int,
+    subjectHorse: Int,
+    subjectTeacherId: Int,
+    journalTopics: LazyPagingItems<JournalTopic>,
     journalResponse: Result<Unit?>?,
-    journalSubjects: LazyPagingItems<JournalSubject>,
+    journalRowList: LazyPagingItems<JournalRow>,
     students: LazyPagingItems<Student>,
     onJournalTopicTableScreen: (journalSubjectId: Int, maxSubjectHours: Int, teacherId: Int) -> Unit,
     onBackScreen: () -> Unit,
-    onCreateJournalSubjectScreen: () -> Unit,
     onStudentDetailsScreen: (studentId: Int) -> Unit,
     onAddColumn: (body: CreateJournalColumnBody) -> Unit,
     onUpdateColumn: (columnId: Int, evaluation: JournalEvaluation) -> Unit,
     onDeleteColumn: (columnId: Int) -> Unit,
     onJournalDetailsBottomDrawerTypeChange: (JournalDetailsBottomDrawerType?) -> Unit,
     saveLocalJournal: () -> Unit,
-    onNetworkDataChange: (Boolean) -> Unit
+    onNetworkDataChange: (Boolean) -> Unit,
+    getJournalTopics: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     var showMainMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         scaffoldState = scaffoldState,
         backgroundColor = PgkTheme.colors.primaryBackground,
         topBar = {
-
-            val title = if(journalSubjects.itemCount > 0)
-                journalSubjects[pagerState.currentPage]?.subject?.subjectTitle
-                    ?: stringResource(id = R.string.journal)
-            else
-                stringResource(id = R.string.journal)
-
             TopBarBack(
-                title = title,
+                title = subjectTitle,
                 onBackClick = onBackScreen,
                 modifier = Modifier.clickable {
                     onJournalDetailsBottomDrawerTypeChange(JournalDetailsBottomDrawerType.JournalSubjectDetails)
                 },
                 actions = {
 
-                    AnimatedVisibility(visible = pagerState.currentPage != 0
-                            && journalResponse !is Result.Loading) {
-
-                        IconButton(onClick = {
-                            if(pagerState.currentPage != 0){
-                                scope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage-1)
-                                }
-                            }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowLeft,
-                                contentDescription = null,
-                                tint = PgkTheme.colors.tintColor
-                            )
-                        }
-                    }
-
                     AnimatedVisibility(visible = journalResponse is Result.Loading ||
-                            journalSubjects.loadState.append is LoadState.Loading
+                            journalRowList.loadState.append is LoadState.Loading
                     ) {
                         CircularProgressIndicator(color = PgkTheme.colors.tintColor)
-                    }
-
-                    AnimatedVisibility(visible = pagerState.currentPage != (journalSubjects.itemCount-1)
-                            && journalResponse !is Result.Loading) {
-
-                        IconButton(onClick = {
-                            if(pagerState.currentPage != (journalSubjects.itemCount-1)){
-                                scope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage+1)
-                                }
-                            }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowRight,
-                                contentDescription = null,
-                                tint = PgkTheme.colors.tintColor
-                            )
-                        }
                     }
 
                     Box {
@@ -311,40 +278,29 @@ private fun JournalDetailsScreen(
 
                         MainMenu(
                             show = showMainMenu,
-                            onDismissRequest = { showMainMenu = false },
-                            contentSubjectVisible = journalSubjects.itemCount > 0,
                             downloadSubjectVisible = !journalExistsDatabase,
-                            createJournalSubjectVisible = userRole == UserRole.TEACHER,
                             networkModeVisible = journalExistsDatabase,
                             enabledNetworkMode = networkModeData,
-                            onClick = { menu ->
-                                when(menu){
-                                    JournalDetailsMenu.CONTENT_SUBJECT -> {
-                                        onJournalDetailsBottomDrawerTypeChange(
-                                            JournalDetailsBottomDrawerType.JournalSubjectList
-                                        )
-                                    }
-                                    JournalDetailsMenu.DOWNLOAD -> saveLocalJournal()
-                                    JournalDetailsMenu.CREATE_JOURNAL_SUBJECT -> {
-                                        onCreateJournalSubjectScreen()
-                                    }
-                                    JournalDetailsMenu.NETWORK_MODE -> {
-                                        onNetworkDataChange(!networkModeData)
-                                    }
+                            onDismissRequest = { showMainMenu = false }
+                        ) { menu ->
+                            when (menu) {
+                                JournalDetailsMenu.DOWNLOAD -> saveLocalJournal()
+                                JournalDetailsMenu.NETWORK_MODE -> {
+                                    onNetworkDataChange(!networkModeData)
                                 }
                             }
-                        )
+                        }
                     }
                 }
             )
         },
         content = { paddingValues ->
             if (
-                journalSubjects.itemCount <= 0 && journalSubjects.loadState.refresh !is LoadState.Loading
+                journalRowList.itemCount <= 0 && journalRowList.loadState.refresh !is LoadState.Loading
             ){
                 EmptyUi()
-            }else if(journalSubjects.loadState.refresh is LoadState.Error && networkModeData) {
-                val error = (journalSubjects.loadState.refresh as LoadState.Error).error
+            }else if(journalRowList.loadState.refresh is LoadState.Error && networkModeData) {
+                val error = (journalRowList.loadState.refresh as LoadState.Error).error
                 ErrorUi(error.message)
             }else {
                 BottomDrawer(
@@ -353,49 +309,45 @@ private fun JournalDetailsScreen(
                     drawerShape = PgkTheme.shapes.cornersStyle,
                     gesturesEnabled = bottomDrawerState.isOpen,
                     drawerContent = {
-                        if(journalSubjects.itemCount > 0) {
-                            BottomDrawerContent(
-                                pagerState = pagerState,
-                                journalSubject = journalSubjects[pagerState.currentPage]!!,
-                                journalDetailsBottomDrawerType = journalDetailsBottomDrawerType,
-                                journalSubjects = journalSubjects,
-                                onJournalTopicTableScreen = onJournalTopicTableScreen,
-                                onAddColumn = onAddColumn,
-                                onUpdateColumn = onUpdateColumn,
-                                onDeleteColumn = onDeleteColumn
-                            )
-                        }else {
-                            EmptyUi()
-                        }
+                        BottomDrawerContent(
+                            journalSubjectId = journalSubjectId,
+                            subjectTitle = subjectTitle,
+                            subjectTeacher = subjectTeacher,
+                            subjectHorse = subjectHorse,
+                            journalTeacherId = subjectTeacherId,
+                            journalTopics = journalTopics,
+                            journalDetailsBottomDrawerType = journalDetailsBottomDrawerType,
+                            onJournalTopicTableScreen = onJournalTopicTableScreen,
+                            onAddColumn = onAddColumn,
+                            onUpdateColumn = onUpdateColumn,
+                            onDeleteColumn = onDeleteColumn,
+                            getJournalTopics = getJournalTopics
+                        )
                     }
                 ){
-                    if(journalSubjects.itemCount > 0){
+                    if(journalRowList.itemCount > 0){
                         JournalSubjectsUi(
-                            journalSubjects = journalSubjects,
+                            journalRowList = journalRowList,
                             userRole = userRole,
                             userId = userId,
-                            pagerState = pagerState,
+                            subjectTeacherId = subjectTeacherId,
                             paddingValues = paddingValues,
                             students = students,
                             onClickStudent = { onStudentDetailsScreen(it.id) }
                         ) { evaluation, columnId, rowId, student, date ->
 
-                            if(journalSubjects.itemCount > 0){
-                                val journalSubject =  journalSubjects[pagerState.currentPage]!!
-
-                                if(userRole == UserRole.ADMIN
-                                    || (userRole == UserRole.TEACHER && journalSubject.teacher.id == userId)
-                                ){
-                                    onJournalDetailsBottomDrawerTypeChange(
-                                        JournalDetailsBottomDrawerType.JournalColumn(
-                                            columnId = columnId,
-                                            rowId = rowId,
-                                            student = student,
-                                            date = date,
-                                            evaluation = evaluation
-                                        )
+                            if(userRole == UserRole.ADMIN
+                                || (userRole == UserRole.TEACHER && subjectTeacherId == userId)
+                            ){
+                                onJournalDetailsBottomDrawerTypeChange(
+                                    JournalDetailsBottomDrawerType.JournalColumn(
+                                        columnId = columnId,
+                                        rowId = rowId,
+                                        student = student,
+                                        date = date,
+                                        evaluation = evaluation
                                     )
-                                }
+                                )
                             }
                         }
                     }else {
@@ -410,8 +362,6 @@ private fun JournalDetailsScreen(
 @Composable
 private fun MainMenu(
     show: Boolean,
-    createJournalSubjectVisible: Boolean = false,
-    contentSubjectVisible: Boolean = false,
     downloadSubjectVisible: Boolean = false,
     networkModeVisible: Boolean = false,
     enabledNetworkMode: Boolean = false,
@@ -424,15 +374,7 @@ private fun MainMenu(
         modifier = Modifier.background(PgkTheme.colors.secondaryBackground)
     ) {
         JournalDetailsMenu.values().forEach { menu ->
-            if(menu == JournalDetailsMenu.CREATE_JOURNAL_SUBJECT){
-                if(createJournalSubjectVisible){
-                    MainMenuItem(menu = menu) { onClick(menu); onDismissRequest() }
-                }
-            }else if(menu == JournalDetailsMenu.CONTENT_SUBJECT){
-                if(contentSubjectVisible){
-                    MainMenuItem(menu = menu) { onClick(menu); onDismissRequest() }
-                }
-            }else if(menu == JournalDetailsMenu.DOWNLOAD){
+            if(menu == JournalDetailsMenu.DOWNLOAD){
                 if(downloadSubjectVisible){
                     MainMenuItem(menu = menu) { onClick(menu); onDismissRequest() }
                 }
@@ -480,49 +422,44 @@ private fun MainMenuItem(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun BottomDrawerContent(
-    pagerState: PagerState,
     journalDetailsBottomDrawerType: JournalDetailsBottomDrawerType?,
-    journalSubjects: LazyPagingItems<JournalSubject>,
-    journalSubject: JournalSubject,
+    journalSubjectId: Int,
+    subjectTitle: String,
+    subjectTeacher: String,
+    journalTeacherId: Int,
+    subjectHorse: Int,
+    journalTopics: LazyPagingItems<JournalTopic>,
     onJournalTopicTableScreen: (journalSubjectId: Int, maxSubjectHours: Int, teacherId: Int) -> Unit,
     onAddColumn: (body: CreateJournalColumnBody) -> Unit,
     onUpdateColumn: (columnId: Int, evaluation: JournalEvaluation) -> Unit,
-    onDeleteColumn: (columnId: Int) -> Unit
+    onDeleteColumn: (columnId: Int) -> Unit,
+    getJournalTopics: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-
     when(journalDetailsBottomDrawerType) {
         JournalDetailsBottomDrawerType.JournalSubjectDetails -> JournalSubjectDetails(
-            journalSubject = journalSubject,
-            onJournalTopicTableScreen = onJournalTopicTableScreen
-        )
-        JournalDetailsBottomDrawerType.JournalSubjectList -> JournalSubjectList(
-            journalSubjects = journalSubjects,
-            onClickItem = { _, index ->
-                scope.launch {
-                    pagerState.animateScrollToPage(index)
-                }
-            }
+            subjectTitle = subjectTitle,
+            journalSubjectId = journalSubjectId,
+            subjectTeacher = subjectTeacher,
+            journalTeacherId = journalTeacherId,
+            subjectHorse = subjectHorse,
+            journalTopics = journalTopics,
+            onJournalTopicTableScreen = onJournalTopicTableScreen,
+            getJournalTopics = getJournalTopics
         )
         is JournalDetailsBottomDrawerType.JournalColumn -> {
-            if(journalSubjects.itemCount > 0){
-                JournalColumn(
-                    columnId = journalDetailsBottomDrawerType.columnId,
-                    rowId = journalDetailsBottomDrawerType.rowId,
-                    student = journalDetailsBottomDrawerType.student,
-                    date = journalDetailsBottomDrawerType.date,
-                    evaluation = journalDetailsBottomDrawerType.evaluation,
-                    onAddColumn = onAddColumn,
-                    onUpdateColumn = onUpdateColumn,
-                    onDeleteColumn = onDeleteColumn,
-                    journalSubjectId = journalSubjects[pagerState.currentPage]!!.id
-                )
-            }else {
-                EmptyUi()
-            }
+            JournalColumn(
+                columnId = journalDetailsBottomDrawerType.columnId,
+                rowId = journalDetailsBottomDrawerType.rowId,
+                student = journalDetailsBottomDrawerType.student,
+                date = journalDetailsBottomDrawerType.date,
+                evaluation = journalDetailsBottomDrawerType.evaluation,
+                onAddColumn = onAddColumn,
+                onUpdateColumn = onUpdateColumn,
+                onDeleteColumn = onDeleteColumn,
+                journalSubjectId = journalSubjectId
+            )
         }
         else -> EmptyUi()
     }
@@ -673,13 +610,23 @@ private fun JournalColumn(
 
 @Composable
 private fun JournalSubjectDetails(
-    journalSubject: JournalSubject,
-    onJournalTopicTableScreen: (journalSubjectId: Int, maxSubjectHours: Int, teacherId: Int) -> Unit
+    subjectTitle: String,
+    subjectTeacher: String,
+    journalSubjectId: Int,
+    journalTeacherId: Int,
+    subjectHorse: Int,
+    journalTopics: LazyPagingItems<JournalTopic>,
+    onJournalTopicTableScreen: (journalSubjectId: Int, maxSubjectHours: Int, teacherId: Int) -> Unit,
+    getJournalTopics: () -> Unit
 ) {
+    LaunchedEffect(key1 = Unit, block = {
+        getJournalTopics()
+    })
+
     LazyColumn {
         item {
             Text(
-                text = "${journalSubject.subject}\n(${journalSubject.teacher})",
+                text = "$subjectTitle}\n($subjectTeacher)",
                 color = PgkTheme.colors.primaryText,
                 style = PgkTheme.typography.heading,
                 fontFamily = PgkTheme.fontFamily.fontFamily,
@@ -696,7 +643,7 @@ private fun JournalSubjectDetails(
                     .fillMaxWidth()
                     .clickable {
                         onJournalTopicTableScreen(
-                            journalSubject.id, journalSubject.hours, journalSubject.teacher.id
+                            journalSubjectId, subjectHorse, journalTeacherId
                         )
                     },
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -717,11 +664,13 @@ private fun JournalSubjectDetails(
             }
         }
 
-        items(journalSubject.topics){ topic ->
-            JournalTopicItem(
-                topic = topic,
-                maxSubjectHours = journalSubject.hours
-            )
+        items(journalTopics){ topic ->
+            topic?.let {
+                JournalTopicItem(
+                    topic = it,
+                    maxSubjectHours = subjectHorse
+                )
+            }
         }
     }
 }
@@ -778,69 +727,11 @@ private fun JournalTopicItem(
 }
 
 @Composable
-private fun JournalSubjectList(
-    journalSubjects: LazyPagingItems<JournalSubject>,
-    onClickItem: (JournalSubject, index: Int) -> Unit
-) {
-    LazyColumn {
-        itemsIndexed(journalSubjects) {index, journalSubject ->
-            if(journalSubject != null) {
-                JournalSubjectItem(
-                    journalSubject = journalSubject,
-                    index = index,
-                    onClick = { onClickItem(journalSubject,index) }
-                )
-            }
-        }
-
-        if(
-            journalSubjects.loadState.append is LoadState.Loading
-            || journalSubjects.loadState.refresh is LoadState.Loading
-        ){
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    CircularProgressIndicator(
-                        color = PgkTheme.colors.tintColor
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun JournalSubjectItem(
-    journalSubject: JournalSubject,
-    index: Int,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier.clickable { onClick() }
-    ) {
-        Divider(color = PgkTheme.colors.primaryBackground)
-
-        Text(
-            text = "${index + 1}. ${journalSubject.subject} (${journalSubject.teacher})",
-            color = PgkTheme.colors.primaryText,
-            style = PgkTheme.typography.body,
-            fontFamily = PgkTheme.fontFamily.fontFamily,
-            modifier = Modifier.padding(5.dp)
-        )
-
-        Divider(color = PgkTheme.colors.primaryBackground)
-    }
-}
-
-@OptIn(ExperimentalPagerApi::class)
-@Composable
 private fun JournalSubjectsUi(
-    journalSubjects: LazyPagingItems<JournalSubject>,
-    pagerState: PagerState,
+    journalRowList: LazyPagingItems<JournalRow>,
     userRole: UserRole?,
     userId: Int?,
+    subjectTeacherId: Int?,
     paddingValues: PaddingValues,
     students: LazyPagingItems<Student>,
     onClickStudent: (Student) -> Unit,
@@ -852,27 +743,18 @@ private fun JournalSubjectsUi(
         date: Date?
     ) -> Unit
 ) {
-    VerticalPager(
-        count = journalSubjects.itemCount,
-        state = pagerState,
-        userScrollEnabled = false,
-        contentPadding = paddingValues
-    ) { pageIndex ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            val journalSubject = journalSubjects[pageIndex]
-
-            if(journalSubject != null){
-                JournalTableUi(
-                    rows = journalSubject.rows,
-                    addColumnButtonVisibility = userRole == UserRole.ADMIN
-                            || (userRole == UserRole.TEACHER && journalSubject.teacher.id == userId),
-                    students = students,
-                    onClickStudent = onClickStudent,
-                    onClickEvaluation = onClickEvaluation
-                )
-            }else{
-                EmptyUi()
-            }
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        JournalTableUi(
+            rows = journalRowList.itemSnapshotList,
+            addColumnButtonVisibility = userRole == UserRole.ADMIN
+                    || (userRole == UserRole.TEACHER && subjectTeacherId == userId),
+            students = students,
+            onClickStudent = onClickStudent,
+            onClickEvaluation = onClickEvaluation
+        )
     }
 }

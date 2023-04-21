@@ -20,7 +20,6 @@ data class Group(
     val course:Int,
     val number:Int,
     val speciality: Specialization,
-    val department: Department,
     val classroomTeacher: Teacher,
     val headman: Student? = null,
     val deputyHeadma: Student? = null

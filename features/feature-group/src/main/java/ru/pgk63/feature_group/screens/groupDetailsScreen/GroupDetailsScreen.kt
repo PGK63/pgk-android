@@ -229,10 +229,10 @@ private fun GroupDetailsScreen(
                                 Spacer(modifier = Modifier.height(10.dp))
 
                                 DepartmentAndSpecialityUi(
-                                    department = groupResult.data!!.department,
+                                    department = groupResult.data!!.speciality.department,
                                     speciality = groupResult.data!!.speciality,
                                     onClickDepartment = {
-                                        onDepartmentDetailsScreen(groupResult.data!!.department.id)
+                                        onDepartmentDetailsScreen(groupResult.data!!.speciality.department.id)
                                     },
                                     onClickSpecialization = {
                                         onSpecializationDetailsScreen(groupResult.data!!.speciality.id)

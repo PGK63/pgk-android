@@ -29,7 +29,7 @@ class JournalSubjectPagingSource(
             LoadResult.Page(
                 data = data.results,
                 prevKey = if (page == 1) null else page - 1,
-                nextKey = if(data.results.size < Constants.JOURNAL_SUBJECTS_PAGE_SIZE) null else page + 1
+                nextKey = if(data.results.size < Constants.PAGE_SIZE) null else page + 1
             )
         }catch (e:Exception){
             LoadResult.Error(e)

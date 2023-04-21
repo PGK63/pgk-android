@@ -6,8 +6,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.paging.ItemSnapshotList
 import androidx.paging.compose.LazyPagingItems
 import ru.pgk63.core_common.extension.parseToBaseDateFormat
+import ru.pgk63.core_model.journal.JournalEvaluation
+import ru.pgk63.core_model.journal.JournalRow
+import ru.pgk63.core_model.student.Student
 import ru.pgk63.core_ui.view.table.Table
 import ru.pgk63.core_ui.view.table.TableCell
 import ru.pgk63.core_ui.R
@@ -17,19 +21,19 @@ import java.util.*
 internal fun BoxScope.JournalTableUi(
     modifier: Modifier = Modifier,
     verticalLazyListState: LazyListState = rememberLazyListState(),
-    rows: List<ru.pgk63.core_model.journal.JournalRow>,
-    students: LazyPagingItems<ru.pgk63.core_model.student.Student>,
+    rows: ItemSnapshotList<JournalRow>,
+    students: LazyPagingItems<Student>,
     addColumnButtonVisibility: Boolean,
-    onClickStudent: (ru.pgk63.core_model.student.Student) -> Unit,
+    onClickStudent: (Student) -> Unit,
     onClickEvaluation: (
-        ru.pgk63.core_model.journal.JournalEvaluation?,
+        JournalEvaluation?,
         columnId: Int?,
         rowId: Int?,
-        student: ru.pgk63.core_model.student.Student,
+        student: Student,
         date: Date?
     ) -> Unit
 ) {
-    val columns = rows.map { it.columns }.flatten()
+    val columns = rows.map { it!!.columns }.flatten()
     val dates = columns.map { it.date }.distinct().sortedBy { it }
 
     Table(
@@ -70,7 +74,7 @@ internal fun BoxScope.JournalTableUi(
             val date = dates[columnIndex-1]
             val student = students[rowIndex-1]
 
-            val row = rows.firstOrNull { it.student.id == student?.id }
+            val row = rows.firstOrNull { it!!.student.id == student?.id }
 
             val column =  row?.columns?.firstOrNull { it.date == date }
 

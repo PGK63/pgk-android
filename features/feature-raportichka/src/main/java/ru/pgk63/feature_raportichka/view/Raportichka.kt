@@ -180,7 +180,6 @@ private fun RaportichkaTable() {
             course = 2,
             number = 39,
             speciality = specialization,
-            department = department,
             classroomTeacher = teacher,
         )
     )

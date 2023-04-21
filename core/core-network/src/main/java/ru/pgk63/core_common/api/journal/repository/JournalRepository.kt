@@ -4,7 +4,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
-import ru.pgk63.core_common.Constants.JOURNAL_SUBJECTS_PAGE_SIZE
 import ru.pgk63.core_common.Constants.PAGE_SIZE
 import ru.pgk63.core_common.api.journal.JournalApi
 import ru.pgk63.core_common.api.journal.paging.*
@@ -41,7 +40,7 @@ class JournalRepository @Inject constructor(
     fun getJournalSubjects(
         journalId:Int? = null
     ): Flow<PagingData<ru.pgk63.core_model.journal.JournalSubject>> {
-        return Pager(PagingConfig(pageSize = JOURNAL_SUBJECTS_PAGE_SIZE)){
+        return Pager(PagingConfig(pageSize = PAGE_SIZE)){
             JournalSubjectPagingSource(
                 journalApi = journalApi,
                 journalId = journalId

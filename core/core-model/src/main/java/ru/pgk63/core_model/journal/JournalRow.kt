@@ -9,6 +9,5 @@ data class JournalRowResponse(
 data class JournalRow(
     val id:Int,
     val student: Student,
-    val journalSubject: JournalSubject,
     val columns: List<JournalColumn>
 )

@@ -21,6 +21,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import kotlinx.coroutines.launch
+import ru.lfybkf19.feature_journal.navigation.onJournalSubjectListScreen
 import ru.lfybkf19.feature_journal.screens.journalListScreen.model.JournalListBottomDrawerType
 import ru.lfybkf19.feature_journal.screens.journalListScreen.viewModel.JournalListViewModel
 import ru.pgk63.core_model.department.Department
@@ -40,13 +41,7 @@ internal fun JournalListRoute(
     viewModel: JournalListViewModel = hiltViewModel(),
     groupId:Int?,
     onBackScreen: () -> Unit,
-    onJournalDetailsScreen: (
-        journalId: Int,
-        course: Int,
-        semester: Int,
-        group: String,
-        groupId: Int,
-    ) -> Unit,
+    onJournalSubjectListScreen: onJournalSubjectListScreen,
 ) {
     val journals = viewModel.responseJournalList.collectAsLazyPagingItems()
     val groups = viewModel.responseGroupList.collectAsLazyPagingItems()
@@ -66,7 +61,7 @@ internal fun JournalListRoute(
 
     LaunchedEffect(Unit){
 
-        if(groupId != null){
+        if(groupId != null && groupId != 0){
             groupsIdSelected.add(groupId)
         }
 
@@ -103,7 +98,7 @@ internal fun JournalListRoute(
         departmentsIdSelected = departmentsIdSelected,
         specialtiesIdSelected = specialtiesIdSelected,
         onBackScreen = onBackScreen,
-        onJournalDetailsScreen = onJournalDetailsScreen,
+        onJournalSubjectListScreen = onJournalSubjectListScreen,
         groupSearchText = groupSearchText,
         departmentSearchText = departmentSearchText,
         specialitySearchText = specialitySearchText,
@@ -189,13 +184,7 @@ private fun JournalListScreen(
     onClickSpecializationItem: (specializationId: Int) -> Unit,
     onSortingJournal: () -> Unit,
     onBackScreen: () -> Unit,
-    onJournalDetailsScreen: (
-        journalId: Int,
-        course: Int,
-        semester: Int,
-        group: String,
-        groupId: Int,
-    ) -> Unit,
+    onJournalSubjectListScreen: onJournalSubjectListScreen
 ) {
     val scope = rememberCoroutineScope()
     val bottomDrawerState = rememberBottomDrawerState(initialValue = BottomDrawerValue.Closed)
@@ -274,7 +263,7 @@ private fun JournalListScreen(
                             journals = journals,
                             journalListDownload = journalListDownload,
                             paddingValues = paddingValues,
-                            onJournalDetailsScreen = onJournalDetailsScreen
+                            onJournalSubjectListScreen = onJournalSubjectListScreen
                         )
                     }else {
                         LoadingUi()
@@ -464,13 +453,7 @@ private fun JournalList(
     journals: LazyPagingItems<Journal>,
     journalListDownload: LazyPagingItems<JournalEntityListItem>,
     paddingValues: PaddingValues,
-    onJournalDetailsScreen: (
-        journalId: Int,
-        course: Int,
-        semester: Int,
-        group: String,
-        groupId: Int,
-    ) -> Unit,
+    onJournalSubjectListScreen: onJournalSubjectListScreen
 ) {
    LazyVerticalGrid(
        columns = GridCells.Fixed(2),
@@ -503,7 +486,7 @@ private fun JournalList(
                                        semester = journal.semester.toString(),
                                        course = journal.course.toString(),
                                        onClick = {
-                                           onJournalDetailsScreen(
+                                           onJournalSubjectListScreen(
                                                journal.id,
                                                journal.course,
                                                journal.semester,
@@ -545,7 +528,7 @@ private fun JournalList(
                        semester = journal.semester.toString(),
                        course = journal.course.toString(),
                        onClick = {
-                           onJournalDetailsScreen(
+                           onJournalSubjectListScreen(
                                journal.id,
                                journal.course,
                                journal.semester,

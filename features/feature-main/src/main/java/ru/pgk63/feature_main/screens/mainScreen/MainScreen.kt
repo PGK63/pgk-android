@@ -5,7 +5,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material.*
@@ -25,18 +24,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import ru.pgk63.core_common.api.raportichka.model.Raportichka
 import ru.pgk63.core_common.api.user.model.UserDetails
 import ru.pgk63.core_common.common.response.Result
 import ru.pgk63.core_common.enums.user.UserRole
 import ru.pgk63.core_common.extension.getWelcomeTimesOfDay
 import ru.pgk63.core_common.extension.launchWhenStarted
-import ru.pgk63.core_common.extension.parseToBaseDateFormat
 import ru.pgk63.core_database.room.database.history.model.History
 import ru.pgk63.core_database.room.database.history.model.HistoryType
 import ru.pgk63.core_ui.icon.ResIcons
@@ -83,8 +77,6 @@ internal fun MainRoute(
     var darkMode by remember { mutableStateOf<Boolean?>(null) }
     var groupId by remember { mutableStateOf<Int?>(null) }
 
-    val raportichkaList = viewModel.responseRaportichkaList.collectAsLazyPagingItems()
-    val journalColumnList = viewModel.responseJournalColumnList.collectAsLazyPagingItems()
     val history = viewModel.responseHistory.collectAsLazyPagingItems()
 
     viewModel.responseUserNetwork.onEach { result ->
@@ -104,10 +96,13 @@ internal fun MainRoute(
 
     MainScreen(
         userResult = userResult,
+        history = history,
         userRole = userRole,
         groupId = groupId,
-        history = history,
         darkMode = darkMode ?: isSystemInDarkTheme(),
+        updateDarkMode = {
+            viewModel.updateDarkMode()
+        },
         onNotificationListScreen = onNotificationListScreen,
         onGroupScreen = onGroupScreen,
         onTechSupportChatScreen = onTechSupportChatScreen,
@@ -128,38 +123,7 @@ internal fun MainRoute(
         onDepartmentDetailsScreen = onDepartmentDetailsScreen,
         onGroupDetailsScreen = onGroupDetailsScreen,
         onSpecializationDetailsScreen = onSpecializationDetailsScreen,
-        onSubjectDetailsScreen = onSubjectDetailsScreen,
-        updateDarkMode = {
-            viewModel.updateDarkMode()
-        },
-        getRaportichkaList = {
-            LaunchedEffect(key1 = Unit) {
-                viewModel.getRaportichkaList(
-                    studentIds = if(
-                        (userRole == UserRole.STUDENT || userRole == UserRole.HEADMAN
-                                || userRole == UserRole.DEPUTY_HEADMAN) && userResult.data?.id != null)
-                        listOf(userResult.data!!.id)
-                    else
-                        null
-                )
-            }
-
-            raportichkaList
-        },
-        getJournalColumnList = {
-            LaunchedEffect(key1 = Unit){
-                viewModel.getJournalColumnList(
-                    studentIds = if(
-                        (userRole == UserRole.STUDENT || userRole == UserRole.HEADMAN
-                                || userRole == UserRole.DEPUTY_HEADMAN) && userResult.data?.id != null)
-                        listOf(userResult.data!!.id)
-                    else
-                        null
-                )
-            }
-
-            journalColumnList
-        }
+        onSubjectDetailsScreen = onSubjectDetailsScreen
     )
 }
 
@@ -185,8 +149,6 @@ private fun MainScreen(
     onJournalScreen: (userRole: UserRole?, userId: Int?, groupId: Int?) -> Unit,
     onGuideListScreen: () -> Unit,
     onSearchScreen: () -> Unit,
-    getRaportichkaList: @Composable () -> LazyPagingItems<Raportichka>,
-    getJournalColumnList: @Composable () -> LazyPagingItems<ru.pgk63.core_model.journal.JournalColumn>,
     onStudentDetailsScreen: (studentId: Int) -> Unit,
     onTeacherDetailsScreen: (teacherId: Int) -> Unit,
     onDepartmentHeadDetailsScreen: (departmentHeadId: Int) -> Unit,
@@ -247,12 +209,8 @@ private fun MainScreen(
                 EmptyUi()
             }else {
                 MainScreenSuccess(
-                    user = userResult.data,
                     history = history,
-                    userRole = userRole,
                     contentPadding = paddingValues,
-                    getRaportichkaList = getRaportichkaList,
-                    getJournalColumnList = getJournalColumnList,
                     onStudentDetailsScreen = onStudentDetailsScreen,
                     onTeacherDetailsScreen = onTeacherDetailsScreen,
                     onDepartmentHeadDetailsScreen = onDepartmentHeadDetailsScreen,
@@ -436,12 +394,8 @@ private fun DrawerContentUi(
 
 @Composable
 private fun MainScreenSuccess(
-    user: UserDetails?,
-    userRole: UserRole?,
     history: LazyPagingItems<History>,
     contentPadding: PaddingValues,
-    getRaportichkaList: @Composable () -> LazyPagingItems<Raportichka>,
-    getJournalColumnList: @Composable () -> LazyPagingItems<ru.pgk63.core_model.journal.JournalColumn>,
     onStudentDetailsScreen: (studentId: Int) -> Unit,
     onTeacherDetailsScreen: (teacherId: Int) -> Unit,
     onDepartmentHeadDetailsScreen: (departmentHeadId: Int) -> Unit,
@@ -451,53 +405,10 @@ private fun MainScreenSuccess(
     onSpecializationDetailsScreen: (specializationId: Int) -> Unit,
     onSubjectDetailsScreen: (subjectId: Int) -> Unit,
 ) {
-    if(userRole == UserRole.STUDENT || userRole == UserRole.HEADMAN || userRole == UserRole.DEPUTY_HEADMAN){
-        LazyColumn(
-            contentPadding = contentPadding,
-            modifier = Modifier.fillMaxSize()
+    if(history.itemCount > 0){
+        Column(
+            modifier = Modifier.padding(contentPadding)
         ) {
-
-            if(history.itemCount > 0) {
-                item {
-                    Text(
-                        text = stringResource(id = R.string.history_body),
-                        color = PgkTheme.colors.primaryText,
-                        fontFamily = PgkTheme.fontFamily.fontFamily,
-                        style = PgkTheme.typography.heading,
-                        modifier = Modifier.padding(15.dp)
-                    )
-
-                    HistoryList(
-                        row = true,
-                        history = history,
-                        onClick = { historyItem ->
-                            when(historyItem.historyType) {
-                                HistoryType.GROUP -> onGroupDetailsScreen(historyItem.contentId)
-                                HistoryType.DEPARTMENT -> onDepartmentDetailsScreen(historyItem.contentId)
-                                HistoryType.STUDENT -> onStudentDetailsScreen(historyItem.contentId)
-                                HistoryType.TEACHER -> onTeacherDetailsScreen(historyItem.contentId)
-                                HistoryType.SUBJECT -> onSubjectDetailsScreen(historyItem.contentId)
-                                HistoryType.SPECIALITY -> onSpecializationDetailsScreen(historyItem.contentId)
-                                HistoryType.DIRECTOR -> onDirectorDetailsScreen(historyItem.contentId)
-                                HistoryType.DEPARTMENT_HEAD -> onDepartmentHeadDetailsScreen(historyItem.contentId)
-                            }
-                        }
-                    )
-                }
-            }
-
-            if(user != null) {
-                item {
-                    MainScreenStudent(
-                        user = user,
-                        getRaportichkaList = getRaportichkaList,
-                        getJournalColumnList = getJournalColumnList
-                    )
-                }
-            }
-        }
-    }else if(history.itemCount > 0){
-        Column {
             Text(
                 text = stringResource(id = R.string.history_body),
                 color = PgkTheme.colors.primaryText,
@@ -507,21 +418,19 @@ private fun MainScreenSuccess(
             )
 
             HistoryList(
-                row = false,
-                history = history,
-                onClick = { historyItem ->
-                    when(historyItem.historyType) {
-                        HistoryType.GROUP -> onGroupDetailsScreen(historyItem.contentId)
-                        HistoryType.DEPARTMENT -> onDepartmentDetailsScreen(historyItem.contentId)
-                        HistoryType.STUDENT -> onStudentDetailsScreen(historyItem.contentId)
-                        HistoryType.TEACHER -> onTeacherDetailsScreen(historyItem.contentId)
-                        HistoryType.SUBJECT -> onSubjectDetailsScreen(historyItem.contentId)
-                        HistoryType.SPECIALITY -> onSpecializationDetailsScreen(historyItem.contentId)
-                        HistoryType.DIRECTOR -> onDirectorDetailsScreen(historyItem.contentId)
-                        HistoryType.DEPARTMENT_HEAD -> onDepartmentHeadDetailsScreen(historyItem.contentId)
-                    }
+                history = history
+            ) { historyItem ->
+                when (historyItem.historyType) {
+                    HistoryType.GROUP -> onGroupDetailsScreen(historyItem.contentId)
+                    HistoryType.DEPARTMENT -> onDepartmentDetailsScreen(historyItem.contentId)
+                    HistoryType.STUDENT -> onStudentDetailsScreen(historyItem.contentId)
+                    HistoryType.TEACHER -> onTeacherDetailsScreen(historyItem.contentId)
+                    HistoryType.SUBJECT -> onSubjectDetailsScreen(historyItem.contentId)
+                    HistoryType.SPECIALITY -> onSpecializationDetailsScreen(historyItem.contentId)
+                    HistoryType.DIRECTOR -> onDirectorDetailsScreen(historyItem.contentId)
+                    HistoryType.DEPARTMENT_HEAD -> onDepartmentHeadDetailsScreen(historyItem.contentId)
                 }
-            )
+            }
         }
     }else {
         EmptyUi()
@@ -531,32 +440,18 @@ private fun MainScreenSuccess(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HistoryList(
-    row: Boolean,
     history: LazyPagingItems<History>,
     onClick: (History) -> Unit
 ) {
-    if(row){
-        LazyRow {
-            items(history, key = { it.historyId }) { item ->
-                if(item != null){
-                    HistoryItem(
-                        history = item,
-                        onClick = { onClick(item) }
-                    )
-                }
-            }
-        }
-    }else {
-        LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
-            items(history) { item ->
-                if(item != null){
-                    HistoryItem(
-                        modifier = Modifier.fillMaxWidth(),
-                        modifierText = Modifier.fillMaxWidth(),
-                        history = item,
-                        onClick = { onClick(item) }
-                    )
-                }
+    LazyVerticalStaggeredGrid(columns = StaggeredGridCells.Fixed(2)) {
+        items(history) { item ->
+            if(item != null){
+                HistoryItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    modifierText = Modifier.fillMaxWidth(),
+                    history = item,
+                    onClick = { onClick(item) }
+                )
             }
         }
     }
@@ -604,156 +499,6 @@ private fun HistoryItem(
         }
     }
 }
-
-@OptIn(ExperimentalPagerApi::class)
-@Composable
-private fun MainScreenStudent(
-    user: UserDetails,
-    getRaportichkaList: @Composable () -> LazyPagingItems<Raportichka>,
-    getJournalColumnList: @Composable () -> LazyPagingItems<ru.pgk63.core_model.journal.JournalColumn>
-) {
-    val raportichkaList = getRaportichkaList()
-    val journalColumnList = getJournalColumnList()
-
-    if(journalColumnList.itemCount > 0){
-
-        Text(
-            text = stringResource(id = R.string.journal),
-            color = PgkTheme.colors.primaryText,
-            fontFamily = PgkTheme.fontFamily.fontFamily,
-            style = PgkTheme.typography.heading,
-            modifier = Modifier.padding(15.dp)
-        )
-
-        HorizontalPager(count = journalColumnList.itemCount) {
-
-            val journalColumn = journalColumnList[it]
-
-            if(journalColumn != null){
-                JournalColumnItem(
-                    journalColumn = journalColumn
-                )
-            }
-        }
-    }
-
-    if(raportichkaList.itemCount > 0){
-
-        Text(
-            text = stringResource(id = R.string.raportichka),
-            color = PgkTheme.colors.primaryText,
-            fontFamily = PgkTheme.fontFamily.fontFamily,
-            style = PgkTheme.typography.heading,
-            modifier = Modifier.padding(15.dp)
-        )
-
-        HorizontalPager(count = raportichkaList.itemCount) { page ->
-
-            val raportichka = raportichkaList[page]
-
-            if(raportichka != null && raportichka.rows.any { it.student.id == user.id }){
-                RaportichkaItem(
-                    raportichka = raportichka,
-                    user = user
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun JournalColumnItem(
-    modifier: Modifier = Modifier,
-    journalColumn: ru.pgk63.core_model.journal.JournalColumn
-) {
-    val journalSubject = journalColumn.row.journalSubject
-
-    Card(
-        modifier = modifier.padding(6.dp),
-        backgroundColor = PgkTheme.colors.secondaryBackground,
-        elevation = 12.dp,
-        shape = PgkTheme.shapes.cornersStyle
-    ) {
-        Column {
-            Text(
-                text = "${journalSubject.subject} (${journalSubject.teacher})",
-                color = PgkTheme.colors.primaryText,
-                fontFamily = PgkTheme.fontFamily.fontFamily,
-                style = PgkTheme.typography.body,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(5.dp),
-                textAlign = TextAlign.Center
-            )
-
-            Text(
-                text = journalColumn.evaluation.text,
-                color = PgkTheme.colors.primaryText,
-                fontFamily = PgkTheme.fontFamily.fontFamily,
-                style = PgkTheme.typography.body,
-                modifier = Modifier
-                    .padding(5.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-
-            Text(
-                text = journalColumn.date.parseToBaseDateFormat(),
-                color = PgkTheme.colors.primaryText,
-                fontFamily = PgkTheme.fontFamily.fontFamily,
-                style = PgkTheme.typography.caption,
-                modifier = Modifier
-                    .padding(5.dp)
-                    .align(Alignment.End)
-            )
-        }
-    }
-}
-
-@Composable
-private fun RaportichkaItem(
-    modifier: Modifier = Modifier,
-    raportichka: Raportichka,
-    user: UserDetails,
-) {
-    Card(
-        modifier = modifier.padding(6.dp),
-        backgroundColor = PgkTheme.colors.secondaryBackground,
-        elevation = 12.dp,
-        shape = PgkTheme.shapes.cornersStyle
-    ) {
-        Column {
-            Text(
-                text = raportichka.date.parseToBaseDateFormat(),
-                color = PgkTheme.colors.primaryText,
-                fontFamily = PgkTheme.fontFamily.fontFamily,
-                style = PgkTheme.typography.body,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(5.dp),
-                textAlign = TextAlign.Center
-            )
-
-            repeat(raportichka.rows.size){ index ->
-
-                val row = raportichka.rows[index]
-
-                if(user.id == row.student.id) {
-                    Text(
-                        text = "${row.numberLesson}. ${row.subject.subjectTitle} (${row.teacher.fioAbbreviated()})",
-                        color = PgkTheme.colors.primaryText,
-                        fontFamily = PgkTheme.fontFamily.fontFamily,
-                        style = PgkTheme.typography.caption,
-                        modifier = Modifier.padding(5.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-
-
 
 
 

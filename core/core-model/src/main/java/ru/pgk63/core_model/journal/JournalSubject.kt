@@ -18,7 +18,7 @@ data class JournalSubject(
     val hours:Int,
     val subject: Subject,
     val teacher:Teacher,
-    val journal: Journal,
-    val topics:List<JournalTopic>,
-    val rows:List<JournalRow>
+//    val journal: Journal,
+//    val topics:List<JournalTopic>,
+//    val rows:List<JournalRow>
 )

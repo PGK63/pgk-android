@@ -353,13 +353,30 @@ fun NavGraphBuilder.mainNavGraphBuilder(
         onBackScreen = {
             navController.navigateUp()
         },
-        onJournalDetailsScreen = { journalId, course, semester, group, groupId ->
+        onJournalDetailsScreen = { journalId, course, semester, group,
+                                   groupId, journalSubjectId, subjectTitle,
+                                   subjectTeacher, subjectHorse, subjectTeacherId ->
+
             navController.navigate(
                 "${JournalDetailsDestination.route}/$journalId?" +
                         "${JournalDetailsDestination.course}=$course&" +
                         "${JournalDetailsDestination.semester}=$semester&" +
                         "${JournalDetailsDestination.group}=$group&" +
-                        "${JournalDetailsDestination.groupId}=$groupId"
+                        "${JournalDetailsDestination.groupId}=$groupId&" +
+                        "${JournalDetailsDestination.journalSubjectId}=$journalSubjectId&" +
+                        "${JournalDetailsDestination.subjectTitle}=$subjectTitle&" +
+                        "${JournalDetailsDestination.subjectTeacher}=$subjectTeacher&" +
+                        "${JournalDetailsDestination.subjectHorse}=$subjectHorse&" +
+                        "${JournalDetailsDestination.subjectTeacherId}=$subjectTeacherId"
+            )
+        },
+        onJournalSubjectListScreen = { journalId, course, semester, group, groupId ->
+            navController.navigate(
+                "${JournalSubjectListDestination.route}/$journalId?" +
+                        "${JournalSubjectListDestination.course}=$course&" +
+                        "${JournalSubjectListDestination.semester}=$semester&" +
+                        "${JournalSubjectListDestination.group}=$group&" +
+                        "${JournalSubjectListDestination.groupId}=$groupId"
             )
         },
         onJournalTopicTableScreen = { journalSubjectId, maxSubjectHours, teacherId ->

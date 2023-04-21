@@ -1,25 +1,18 @@
 package ru.pgk63.core_common.api.journal
 
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.PATCH
-import retrofit2.http.POST
-import retrofit2.http.Path
-import retrofit2.http.Query
-import ru.pgk63.core_common.Constants.JOURNAL_SUBJECTS_PAGE_SIZE
+import retrofit2.http.*
 import ru.pgk63.core_common.Constants.PAGE_SIZE
 
 interface JournalApi {
 
     @GET("/pgk63/api/Journal")
     suspend fun getAll(
-        @Query("course") course:List<Int>?,
-        @Query("semesters") semesters:List<Int>?,
-        @Query("groupIds") groupIds:List<Int>?,
-        @Query("specialityIds") specialityIds:List<Int>?,
-        @Query("departmentIds") departmentIds:List<Int>?,
+        @Query("course") course:List<Int>? = null,
+        @Query("semesters") semesters:List<Int>? = null,
+        @Query("groupIds") groupIds:List<Int>? = null,
+        @Query("specialityIds") specialityIds:List<Int>? = null,
+        @Query("departmentIds") departmentIds:List<Int>? = null,
         @Query("pageNumber") pageNumber:Int,
         @Query("pageSize") pageSize:Int = PAGE_SIZE
     ): ru.pgk63.core_model.journal.JournalResponse
@@ -38,7 +31,7 @@ interface JournalApi {
     suspend fun getJournalSubjects(
         @Query("journalId") journalId:Int?,
         @Query("pageNumber") pageNumber:Int,
-        @Query("pageSize") pageSize:Int = JOURNAL_SUBJECTS_PAGE_SIZE
+        @Query("pageSize") pageSize:Int = PAGE_SIZE
     ): ru.pgk63.core_model.journal.JournalSubjectResponse
 
     @POST("/pgk63/api/Journal/{id}/Subject")

@@ -4,7 +4,6 @@ import java.util.*
 
 internal sealed class JournalDetailsBottomDrawerType {
     object JournalSubjectDetails: JournalDetailsBottomDrawerType()
-    object JournalSubjectList: JournalDetailsBottomDrawerType()
     data class JournalColumn(
         val columnId: Int?,
         val rowId: Int?,
