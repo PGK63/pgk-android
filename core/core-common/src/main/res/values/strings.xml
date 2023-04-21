@@ -42,5 +42,6 @@
     <string name="email_verification">Подтвердите свой адрес электронной почты</string>
     <string name="image">Изображения</string>
     <string name="video">Видео</string>
+    <string name="copy_success">Текст скопирован</string>
     <string name="file">Файл</string>
 </resources>

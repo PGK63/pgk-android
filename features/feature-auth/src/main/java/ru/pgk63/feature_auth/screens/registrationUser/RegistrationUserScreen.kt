@@ -45,6 +45,7 @@ import ru.pgk63.core_ui.view.collapsingToolbar.rememberToolbarScrollBehavior
 import ru.pgk63.feature_auth.screens.registrationUser.model.RegistrationUserState
 import ru.pgk63.feature_auth.screens.registrationUser.viewModel.RegistrationUserViewModel
 import ru.pgk63.core_common.common.response.Result
+import ru.pgk63.core_common.extension.copyToClipboard
 import ru.pgk63.core_ui.paging.items
 
 @SuppressLint("FlowOperatorInvokedInComposition")
@@ -163,6 +164,7 @@ private fun RegistrationUserScreen(
 private fun RegistrationSuccess(
     userRegistrationResponse: UserRegistrationResponse
 ) {
+    val context = LocalContext.current
     val screenHeightDp = LocalConfiguration.current.screenHeightDp
     val screenWidthDp = LocalConfiguration.current.screenWidthDp
 
@@ -189,6 +191,19 @@ private fun RegistrationSuccess(
             modifier = Modifier.padding(15.dp),
             textAlign = TextAlign.Center
         )
+
+        TextButton(onClick = {
+            context.copyToClipboard(userRegistrationResponse.passowrd)
+        }) {
+            Text(
+                text = stringResource(id = R.string.copy),
+                modifier = Modifier.padding(10.dp).fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                color = PgkTheme.colors.primaryText,
+                style = PgkTheme.typography.body,
+                fontFamily = PgkTheme.fontFamily.fontFamily
+            )
+        }
     }
 }
 
