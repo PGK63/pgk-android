@@ -278,8 +278,8 @@ private fun JournalDetailsScreen(
 
                         MainMenu(
                             show = showMainMenu,
-                            downloadSubjectVisible = !journalExistsDatabase,
-                            networkModeVisible = journalExistsDatabase,
+                            downloadSubjectVisible = false, //!journalExistsDatabase
+                            networkModeVisible = false, //journalExistsDatabase
                             enabledNetworkMode = networkModeData,
                             onDismissRequest = { showMainMenu = false }
                         ) { menu ->
@@ -287,6 +287,11 @@ private fun JournalDetailsScreen(
                                 JournalDetailsMenu.DOWNLOAD -> saveLocalJournal()
                                 JournalDetailsMenu.NETWORK_MODE -> {
                                     onNetworkDataChange(!networkModeData)
+                                }
+                                JournalDetailsMenu.INFO -> {
+                                    onJournalDetailsBottomDrawerTypeChange(
+                                        JournalDetailsBottomDrawerType.JournalSubjectDetails
+                                    )
                                 }
                             }
                         }
@@ -499,7 +504,10 @@ private fun JournalColumn(
     LazyColumn {
         item {
             Text(
-                text = "${stringResource(id = R.string.create_journal_column)}\n" +
+                text = "${if(evaluation != null && columnId != null)
+                    stringResource(id = R.string.edit_journal_column)
+                else
+                    stringResource(id = R.string.create_journal_column)}\n" +
                         "${student.fio()}\n$dateText",
                 color = PgkTheme.colors.primaryText,
                 style = PgkTheme.typography.heading,
@@ -577,7 +585,10 @@ private fun JournalColumn(
                 }
             }) {
                 Text(
-                    text = stringResource(id = R.string.add),
+                    text = if(evaluation != null && columnId != null)
+                        stringResource(id = R.string.edit)
+                    else
+                        stringResource(id = R.string.add),
                     color = PgkTheme.colors.tintColor,
                     style = PgkTheme.typography.body,
                     fontFamily = PgkTheme.fontFamily.fontFamily,
@@ -626,7 +637,7 @@ private fun JournalSubjectDetails(
     LazyColumn {
         item {
             Text(
-                text = "$subjectTitle}\n($subjectTeacher)",
+                text = "$subjectTitle\n($subjectTeacher)",
                 color = PgkTheme.colors.primaryText,
                 style = PgkTheme.typography.heading,
                 fontFamily = PgkTheme.fontFamily.fontFamily,

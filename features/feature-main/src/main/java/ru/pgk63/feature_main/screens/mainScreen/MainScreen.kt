@@ -59,7 +59,7 @@ internal fun MainRoute(
     onStudentListScreen: () -> Unit,
     onProfileScreen: () -> Unit,
     onDepartmentListScreen: () -> Unit,
-    onRaportichkaScreen: (userRole: UserRole, userId: Int) -> Unit,
+    onRaportichkaScreen: (userRole: UserRole, userId: Int, groupId: Int?) -> Unit,
     onJournalScreen: (userRole: UserRole?, userId: Int?, groupId: Int?) -> Unit,
     onGuideListScreen: () -> Unit,
     onSearchScreen: () -> Unit,
@@ -145,7 +145,7 @@ private fun MainScreen(
     onStudentListScreen: () -> Unit,
     onProfileScreen: () -> Unit,
     onDepartmentListScreen: () -> Unit,
-    onRaportichkaScreen: (userRole: UserRole, userId: Int) -> Unit,
+    onRaportichkaScreen: (userRole: UserRole, userId: Int, groupId: Int?) -> Unit,
     onJournalScreen: (userRole: UserRole?, userId: Int?, groupId: Int?) -> Unit,
     onGuideListScreen: () -> Unit,
     onSearchScreen: () -> Unit,
@@ -286,7 +286,7 @@ private fun DrawerContentUi(
     onStudentListScreen: () -> Unit,
     onProfileScreen: () -> Unit,
     onDepartmentListScreen: () -> Unit,
-    onRaportichkaScreen: (userRole: UserRole, userId: Int) -> Unit,
+    onRaportichkaScreen: (userRole: UserRole, userId: Int, groupId: Int?) -> Unit,
     onJournalScreen: (userRole: UserRole?, userId: Int?, groupId: Int?) -> Unit,
     onGuideListScreen: () -> Unit,
 ) {
@@ -357,7 +357,7 @@ private fun DrawerContentUi(
                             }
                             DrawerContent.RAPORTICHKA -> {
                                 if(userRole != null && userResult.data != null){
-                                    onRaportichkaScreen(userRole, userResult.data!!.id)
+                                    onRaportichkaScreen(userRole, userResult.data!!.id, groupId)
                                 }
                             }
                             DrawerContent.SETTINGS -> onSettingsScreen()

@@ -405,8 +405,8 @@ private fun SheetContent(
                         type.row.teacher.id == (user.userId ?: 0)
                     }
                     UserRole.DEPUTY_HEADMAN, UserRole.HEADMAN -> {
-                        !type.row.confirmation || raportichka?.group?.headman?.id == user.userId ||
-                                raportichka?.group?.deputyHeadma?.id == user.userId
+                        !type.row.confirmation && (raportichka?.group?.headman?.id == user.userId ||
+                                raportichka?.group?.deputyHeadma?.id == user.userId)
                     }
                     else -> false
                 }

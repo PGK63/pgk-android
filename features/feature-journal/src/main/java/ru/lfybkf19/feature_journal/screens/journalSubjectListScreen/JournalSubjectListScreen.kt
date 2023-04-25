@@ -135,7 +135,7 @@ private fun JournalSubjectListScreen(
                                         groupId,
                                         item.id,
                                         item.subject.subjectTitle,
-                                        item.teacher.fio(),
+                                        item.teacher.fioAbbreviated(),
                                         item.hours,
                                         item.teacher.id
                                     )

@@ -77,14 +77,21 @@ fun NavGraphBuilder.mainNavGraphBuilder(
         onDepartmentListScreen = {
             navController.navigate(DepartmentListDestination.route)
         },
-        onRaportichkaScreen = { userRole, userId ->
-            if(userRole != UserRole.STUDENT && userRole != UserRole.HEADMAN &&userRole != UserRole.DEPUTY_HEADMAN){
-                navController.navigate(RaportichkaSortingDestination.route)
-            }else {
-                navController.navigate(
-                    RaportichkaListDestination.route +
-                            "?${RaportichkaListDestination.studentIds}=${listOf(userId)}"
-                )
+        onRaportichkaScreen = { userRole, userId, groupId ->
+            when(userRole){
+                UserRole.STUDENT -> {
+                    navController.navigate(
+                        RaportichkaListDestination.route +
+                                "?${RaportichkaListDestination.studentIds}=${listOf(userId)}"
+                    )
+                }
+                UserRole.HEADMAN, UserRole.DEPUTY_HEADMAN -> {
+                    navController.navigate(
+                        RaportichkaListDestination.route +
+                                "?${RaportichkaListDestination.groupIds}=${listOf(groupId)}"
+                    )
+                }
+                else -> navController.navigate(RaportichkaSortingDestination.route)
             }
         },
         onJournalScreen = { _, _, groupId ->

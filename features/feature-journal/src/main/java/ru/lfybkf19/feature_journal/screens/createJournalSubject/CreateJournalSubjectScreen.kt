@@ -23,8 +23,10 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.onEach
 import ru.lfybkf19.feature_journal.screens.createJournalSubject.viewModel.CreateJournalSubjectViewModel
 import ru.pgk63.core_common.common.response.Result
+import ru.pgk63.core_common.enums.user.UserRole
 import ru.pgk63.core_common.extension.launchWhenStarted
 import ru.pgk63.core_common.validation.numberValidation
+import ru.pgk63.core_database.user.model.UserLocalDatabase
 import ru.pgk63.core_ui.R
 import ru.pgk63.core_ui.theme.PgkTheme
 import ru.pgk63.core_ui.view.NextButton
@@ -45,6 +47,7 @@ internal fun CreateJournalSubjectRoute(
 
     val subjects = viewModel.responseSubjectList.collectAsLazyPagingItems()
     var createJournalSubjectResult by remember { mutableStateOf<Result<Unit?>?>(null) }
+    var user by remember { mutableStateOf<UserLocalDatabase?>(null) }
 
     var searchText by remember { mutableStateOf("") }
 
@@ -52,8 +55,18 @@ internal fun CreateJournalSubjectRoute(
         createJournalSubjectResult = it
     }.launchWhenStarted()
 
-    LaunchedEffect(key1 = Unit, block = {
-        viewModel.getSubjectList(search = searchText.ifEmpty { null })
+    viewModel.responseUserLocal.onEach {
+        user = it
+    }.launchWhenStarted()
+
+    LaunchedEffect(searchText, user, block = {
+        viewModel.getSubjectList(
+            search = searchText.ifEmpty { null },
+            teacherId = if(user?.userRole == UserRole.TEACHER)
+                user?.userId
+            else
+                null
+        )
     })
 
     LaunchedEffect(key1 = createJournalSubjectResult, block = {
@@ -176,7 +189,9 @@ private fun CreateJournalSubjectUi(
         Spacer(modifier = Modifier.height(10.dp))
 
         SortingItem(
-            modifier = Modifier.fillMaxWidth().align(Alignment.Start),
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Start),
             title = stringResource(id = R.string.subject),
             content = subjects,
             searchText = searchText,

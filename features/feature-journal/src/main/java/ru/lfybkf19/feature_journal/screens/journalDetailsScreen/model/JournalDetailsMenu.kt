@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import ru.pgk63.core_ui.R
 
 enum class JournalDetailsMenu(@StringRes val nameId: Int, val icon: ImageVector) {
+    INFO(R.string.information, Icons.Default.Info),
     DOWNLOAD(R.string.download_journal, Icons.Default.Download),
-    NETWORK_MODE(R.string.network, Icons.Default.NetworkWifi)
+    NETWORK_MODE(R.string.network, Icons.Default.NetworkWifi),
 }

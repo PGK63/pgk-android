@@ -35,10 +35,10 @@ interface JournalApi {
     ): ru.pgk63.core_model.journal.JournalSubjectResponse
 
     @POST("/pgk63/api/Journal/{id}/Subject")
-    suspend fun createJournalSubject(
+    suspend fun createJournalSubject( //////////////////////////////////////////////////////
         @Path("id") journalId: Int,
         @Body body: ru.pgk63.core_model.journal.CreateJournalSubjectBody
-    ): Response<Unit?>
+    ): Response<Unit?> /////////////////////////////////////////////////////////////////////
 
     @DELETE("/pgk63/api/Journal/Subject/{id}")
     suspend fun deleteJournalSubject(

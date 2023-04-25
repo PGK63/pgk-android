@@ -53,6 +53,24 @@ fun rememberTextFieldColors(
 )
 
 @Composable
+fun rememberTextFieldColors(
+    textColor: Color = PgkTheme.colors.primaryText,
+    backgroundColor: Color = PgkTheme.colors.primaryBackground,
+    cursorColor: Color = PgkTheme.colors.tintColor,
+    focusedLabelColor: Color = PgkTheme.colors.tintColor,
+    unfocusedLabelColor: Color = PgkTheme.colors.primaryText,
+    unfocusedBorderColor: Color = PgkTheme.colors.controlColor,
+) = TextFieldDefaults.outlinedTextFieldColors(
+    textColor = textColor,
+    backgroundColor = backgroundColor,
+    cursorColor = cursorColor,
+    focusedLabelColor = focusedLabelColor,
+    unfocusedLabelColor = unfocusedLabelColor,
+    focusedBorderColor = focusedLabelColor,
+    unfocusedBorderColor = unfocusedBorderColor
+)
+
+@Composable
 fun TextFieldBase(
     text: String,
     onTextChanged: (String) -> Unit,

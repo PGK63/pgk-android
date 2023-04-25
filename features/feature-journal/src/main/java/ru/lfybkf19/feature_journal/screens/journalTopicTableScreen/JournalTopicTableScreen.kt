@@ -21,6 +21,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ru.lfybkf19.feature_journal.screens.journalTopicTableScreen.model.JournalTopicRowMenu
 import ru.lfybkf19.feature_journal.screens.journalTopicTableScreen.model.JournalTopicTableBottomDrawerType
 import ru.lfybkf19.feature_journal.screens.journalTopicTableScreen.viewModel.JournalTopicTableViewModel
@@ -57,6 +58,7 @@ internal fun JournalTopicTableRoute(
     val context = LocalContext.current
 
     val scaffoldState = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
     val bottomDrawerState = rememberBottomDrawerState(initialValue = BottomDrawerValue.Closed)
 
     val topics = viewModel.responseJournalTopicList.collectAsLazyPagingItems()
@@ -80,20 +82,6 @@ internal fun JournalTopicTableRoute(
 
     LaunchedEffect(key1 = Unit, block = {
         viewModel.getJournalTopics(journalSubjectId = journalSubjectId)
-    })
-
-    LaunchedEffect(key1 = journalTopicTableBottomDrawerType, block = {
-        if(journalTopicTableBottomDrawerType != null){
-            bottomDrawerState.open()
-        }else {
-            bottomDrawerState.close()
-        }
-    })
-
-    LaunchedEffect(key1 = bottomDrawerState.isOpen, block = {
-        if(!bottomDrawerState.isOpen){
-            journalTopicTableBottomDrawerType = null
-        }
     })
 
     LaunchedEffect(key1 = createJournalTopicResult, block = {
@@ -134,7 +122,14 @@ internal fun JournalTopicTableRoute(
         journalTopicTableBottomDrawerType = journalTopicTableBottomDrawerType,
         onBackScreen = onBackScreen,
         onJournalTopicTableBottomDrawerTypeChange = {
-            journalTopicTableBottomDrawerType = it
+            scope.launch {
+                if(it == null)
+                    bottomDrawerState.close()
+                else
+                    bottomDrawerState.open()
+
+                journalTopicTableBottomDrawerType = it
+            }
         },
         createJournalTopic = {
             viewModel.createJournalTopic(journalSubjectId, it)
@@ -205,7 +200,9 @@ private fun JournalTopicTableScreen(
                     BottomDrawerContent(
                         type = journalTopicTableBottomDrawerType,
                         createJournalTopic = createJournalTopic,
-                        deleteTopic = deleteTopic
+                        deleteTopic = deleteTopic,
+                        teacherId = teacherId,
+                        user = user
                     )
                 }
             ){
@@ -233,6 +230,8 @@ private fun JournalTopicTableScreen(
 @Composable
 private fun BottomDrawerContent(
     type: JournalTopicTableBottomDrawerType?,
+    user: UserLocalDatabase,
+    teacherId: Int,
     createJournalTopic: (ru.pgk63.core_model.journal.CreateJournalTopicBody) -> Unit,
     deleteTopic: (topicId: Int) -> Unit
 ) {
@@ -245,6 +244,10 @@ private fun BottomDrawerContent(
                 when(menu) {
                     JournalTopicRowMenu.DELETE -> deleteTopic(type.topic.id)
                 }
+            },
+            visibility = {
+                user.userRole == UserRole.ADMIN
+                        || (user.userRole == UserRole.TEACHER && user.userId == teacherId)
             }
         )
         null -> EmptyUi()
@@ -363,33 +366,36 @@ private fun CreateTopicUi(
 
 @Composable
 private fun TopicRowMenu(
-    onClick: (JournalTopicRowMenu) -> Unit
+    onClick: (JournalTopicRowMenu) -> Unit,
+    visibility: (JournalTopicRowMenu) -> Boolean
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
         JournalTopicRowMenu.values().forEach { menu ->
-            DropdownMenuItem(onClick = { onClick(menu) }) {
-                Icon(
-                    imageVector = menu.icon,
-                    contentDescription = null,
-                    tint = if(menu == JournalTopicRowMenu.DELETE)
-                        PgkTheme.colors.errorColor
-                    else
-                        PgkTheme.colors.primaryText
-                )
+            if(visibility.invoke(menu)){
+                DropdownMenuItem(onClick = { onClick(menu) }) {
+                    Icon(
+                        imageVector = menu.icon,
+                        contentDescription = null,
+                        tint = if(menu == JournalTopicRowMenu.DELETE)
+                            PgkTheme.colors.errorColor
+                        else
+                            PgkTheme.colors.primaryText
+                    )
 
-                Spacer(modifier = Modifier.width(5.dp))
+                    Spacer(modifier = Modifier.width(5.dp))
 
-                Text(
-                    text = stringResource(id = menu.textId),
-                    color = if(menu == JournalTopicRowMenu.DELETE)
-                        PgkTheme.colors.errorColor
-                    else
-                        PgkTheme.colors.primaryText,
-                    style = PgkTheme.typography.caption,
-                    fontFamily = PgkTheme.fontFamily.fontFamily
-                )
+                    Text(
+                        text = stringResource(id = menu.textId),
+                        color = if(menu == JournalTopicRowMenu.DELETE)
+                            PgkTheme.colors.errorColor
+                        else
+                            PgkTheme.colors.primaryText,
+                        style = PgkTheme.typography.caption,
+                        fontFamily = PgkTheme.fontFamily.fontFamily
+                    )
+                }
             }
         }
     }

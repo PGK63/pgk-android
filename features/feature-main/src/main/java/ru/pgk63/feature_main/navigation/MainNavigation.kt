@@ -33,7 +33,7 @@ fun NavGraphBuilder.mainNavigation(
     onStudentListScreen: () -> Unit,
     onProfileScreen: () -> Unit,
     onDepartmentListScreen: () -> Unit,
-    onRaportichkaScreen: (userRole: UserRole, userId: Int) -> Unit,
+    onRaportichkaScreen: (userRole: UserRole, userId: Int, groupId: Int?) -> Unit,
     onJournalScreen: (userRole: UserRole?, userId: Int?, groupId: Int?) -> Unit,
     onGuideListScreen: () -> Unit,
     onSearchScreen: () -> Unit,

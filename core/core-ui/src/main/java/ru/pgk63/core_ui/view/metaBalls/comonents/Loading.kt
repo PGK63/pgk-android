@@ -33,7 +33,7 @@ fun LoadingUi() {
 
             MetaEntity(
                 modifier = Modifier.fillMaxSize(),
-                blur = 40f,
+                blur = 0f,
                 metaContent = {
                     val animation = rememberInfiniteTransition()
                     val rotation by animation.animateFloat(

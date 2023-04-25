@@ -176,7 +176,7 @@ private fun GroupDetailsScreen(
                                 when(menu){
                                     GroupDetailsMenu.ADD_STUDENT,
                                     GroupDetailsMenu.CREATE_JOURNAL,
-                                    GroupDetailsMenu.DELETE_GROUP, GroupDetailsMenu.UPDATE_COURSE  -> {
+                                    GroupDetailsMenu.UPDATE_COURSE  -> {
                                         user.userRole == UserRole.ADMIN
                                                 || user.userRole == UserRole.EDUCATIONAL_SECTOR
                                                 || (user.userRole == UserRole.TEACHER
@@ -187,6 +187,7 @@ private fun GroupDetailsScreen(
                                         user.userRole == UserRole.TEACHER
                                                 && groupResult.data?.classroomTeacher?.id == user.userId
                                     }
+                                    GroupDetailsMenu.DELETE_GROUP -> false
                                 }
                             }
                         ) { menu ->

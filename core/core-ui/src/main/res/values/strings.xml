@@ -11,6 +11,7 @@
     <string name="network">Сеть</string>
     <string name="uploaded_journals">Загруженные журналы</string>
     <string name="create_journal_column">Добавить оценку</string>
+    <string name="edit_journal_column">Изменить оценку</string>
     <string name="history_body">Вы недавно смотрели</string>
     <string name="history">История</string>
     <string name="journal_create">Создать журнал</string>
@@ -182,7 +183,7 @@
     <string name="swipe_to_screen">Проведите пальцем по экрану</string>
     <string name="registration">Регистрация</string>
     <string name="register">Зарегистрировать</string>
-    <string name="your_password">Ваш пароль</string>
+    <string name="your_password">Пароль для входа</string>
     <string name="app_icon">Иконка приложения</string>
     <string name="app_icon_default">Основная</string>
     <string name="app_icon_8_marta">8 Марта</string>

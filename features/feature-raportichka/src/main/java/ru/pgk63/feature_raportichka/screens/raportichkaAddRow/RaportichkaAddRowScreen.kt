@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -294,31 +295,32 @@ private fun CreateRaportichkaScreen(
             contentPadding = paddingValues
         ) {
             item {
-                TextFieldBase(
-                    text = numberLesson,
-                    onTextChanged = onTextNumberLessonChange,
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .fillMaxWidth(),
-                    label = stringResource(id = R.string.number_lesson),
-                    maxChar = 1,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TextFieldBase(
+                        text = numberLesson,
+                        onTextChanged = onTextNumberLessonChange,
+                        modifier = Modifier.padding(5.dp),
+                        label = stringResource(id = R.string.number_lesson),
+                        maxChar = 1,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        )
                     )
-                )
 
-                TextFieldBase(
-                    text = countHours,
-                    onTextChanged = onTextCountHoursChange,
-                    label = stringResource(id = R.string.count_hours),
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .fillMaxWidth(),
-                    maxChar = 1,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number
+                    TextFieldBase(
+                        text = countHours,
+                        onTextChanged = onTextCountHoursChange,
+                        label = stringResource(id = R.string.count_hours),
+                        modifier = Modifier.padding(5.dp),
+                        maxChar = 1,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        )
                     )
-                )
+                }
 
                 Spacer(modifier = Modifier.height(50.dp))
 
