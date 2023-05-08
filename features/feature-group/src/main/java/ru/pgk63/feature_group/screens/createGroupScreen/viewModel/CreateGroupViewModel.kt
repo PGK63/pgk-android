@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.pgk63.core_common.api.department.repository.DepartmentRepository
-import ru.pgk63.core_common.api.group.model.CreateGroupBody
-import ru.pgk63.core_common.api.group.model.CreateGroupResponse
+import ru.pgk63.core_model.group.CreateGroupBody
+import ru.pgk63.core_model.group.CreateGroupResponse
 import ru.pgk63.core_common.api.group.repository.GroupRepository
 import ru.pgk63.core_common.api.speciality.model.Specialization
 import ru.pgk63.core_common.api.speciality.repository.SpecializationRepository

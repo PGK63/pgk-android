@@ -18,7 +18,7 @@ data class GroupResponse(
 data class Group(
     val id:Int,
     val course:Int,
-    val number:Int,
+    val number:String,
     val speciality: Specialization,
     val classroomTeacher: Teacher,
     val headman: Student? = null,
@@ -26,6 +26,6 @@ data class Group(
 ){
     override fun toString(): String {
         return speciality.nameAbbreviation +
-                "-${course}" + "$number"
+                "-${course}" + number
     }
 }

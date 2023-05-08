@@ -24,8 +24,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.onEach
-import ru.pgk63.core_common.api.group.model.CreateGroupBody
-import ru.pgk63.core_common.api.group.model.CreateGroupResponse
+import ru.pgk63.core_model.group.CreateGroupBody
+import ru.pgk63.core_model.group.CreateGroupResponse
 import ru.pgk63.core_common.api.speciality.model.Specialization
 import ru.pgk63.core_common.api.teacher.model.Teacher
 import ru.pgk63.core_common.extension.launchWhenStarted
@@ -291,7 +291,7 @@ private fun CreateGroupUi(
                             createGroup(
                                 CreateGroupBody(
                                     course = number[0].digitToInt(),
-                                    number = number.drop(1).toInt(),
+                                    number = number.drop(1),
                                     specialityId = specialityId!!,
                                     departmentId = departmentId!!,
                                     classroomTeacherId = classroomTeacherId!!

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import ru.pgk63.core_model.group.Group
 import ru.pgk63.core_common.Constants.PAGE_SIZE
 import ru.pgk63.core_common.api.group.GroupApi
-import ru.pgk63.core_common.api.group.model.CreateGroupBody
+import ru.pgk63.core_model.group.CreateGroupBody
 import ru.pgk63.core_common.api.group.paging.GroupPagingSource
 import ru.pgk63.core_model.student.StudentResponse
 import ru.pgk63.core_common.common.response.ApiResponse

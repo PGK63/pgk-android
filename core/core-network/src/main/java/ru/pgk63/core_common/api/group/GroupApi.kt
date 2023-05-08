@@ -11,8 +11,8 @@ import retrofit2.http.Query
 import ru.pgk63.core_model.group.Group
 import ru.pgk63.core_model.group.GroupResponse
 import ru.pgk63.core_common.Constants.PAGE_SIZE
-import ru.pgk63.core_common.api.group.model.CreateGroupBody
-import ru.pgk63.core_common.api.group.model.CreateGroupResponse
+import ru.pgk63.core_model.group.CreateGroupBody
+import ru.pgk63.core_model.group.CreateGroupResponse
 
 interface GroupApi {
 

@@ -109,6 +109,7 @@ internal fun BoxScope.JournalTableUi(
             if(rowIndex != 0 && columnIndex == dates.size + 1) {
 
                 val student = students[rowIndex-1]
+                val row = rows.firstOrNull { it!!.student.id == student?.id }
 
                 if(student != null){
                     TableCell(
@@ -117,7 +118,7 @@ internal fun BoxScope.JournalTableUi(
                         onClick = {
                             onClickEvaluation(
                                 null, null,
-                                null, student, null
+                                row?.id, student, null
                             )
                         }
                     )

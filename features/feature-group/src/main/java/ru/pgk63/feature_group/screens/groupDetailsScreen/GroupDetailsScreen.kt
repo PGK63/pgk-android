@@ -2,13 +2,16 @@ package ru.pgk63.feature_group.screens.groupDetailsScreen
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -17,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -36,7 +40,10 @@ import ru.pgk63.core_common.api.teacher.model.Teacher
 import ru.pgk63.core_common.extension.launchWhenStarted
 import ru.pgk63.core_common.common.response.Result
 import ru.pgk63.core_common.enums.user.UserRole
+import ru.pgk63.core_common.extension.openBrowser
+import ru.pgk63.core_common.link.vedomostAttendance.getVedomostAttendanceLink
 import ru.pgk63.core_database.user.model.UserLocalDatabase
+import ru.pgk63.core_model.Month
 import ru.pgk63.core_navigation.`typealias`.onJournalSubjectListScreen
 import ru.pgk63.core_ui.R
 import ru.pgk63.core_ui.paging.items
@@ -188,6 +195,7 @@ private fun GroupDetailsScreen(
                                                 && groupResult.data?.classroomTeacher?.id == user.userId
                                     }
                                     GroupDetailsMenu.DELETE_GROUP -> false
+                                    GroupDetailsMenu.DOWNLOAD_VEDOMOST -> true
                                 }
                             }
                         ) { menu ->
@@ -207,9 +215,13 @@ private fun GroupDetailsScreen(
                                 GroupDetailsMenu.DELETE_GROUP -> deleteGroup()
                                 GroupDetailsMenu.UPDATE_COURSE -> {
                                     scope.launch {
-                                        bottomDrawerContentState = GroupDetailsBottomDrawerContentState.UpdateCourse(
-                                            groupId = groupId
-                                        )
+                                        bottomDrawerContentState = GroupDetailsBottomDrawerContentState.UpdateCourse
+                                        bottomDrawerState.open()
+                                    }
+                                }
+                                GroupDetailsMenu.DOWNLOAD_VEDOMOST -> {
+                                    scope.launch {
+                                        bottomDrawerContentState = GroupDetailsBottomDrawerContentState.DownloadVedomost
                                         bottomDrawerState.open()
                                     }
                                 }
@@ -238,7 +250,8 @@ private fun GroupDetailsScreen(
                                         bottomDrawerState.close()
                                     }
                                 },
-                                currentCourse = groupResult.data!!.course
+                                currentCourse = groupResult.data!!.course,
+                                groupId = groupId
                             )
                         }
                     ){
@@ -402,15 +415,127 @@ private fun MainMenu(
 @Composable
 private fun BottomDrawerContent(
     bottomDrawerContentState: GroupDetailsBottomDrawerContentState,
+    groupId: Int,
     currentCourse: Int,
     updateCourse: (course: Int) -> Unit
 ) {
     when(bottomDrawerContentState) {
         GroupDetailsBottomDrawerContentState.Empty -> EmptyUi()
-        is GroupDetailsBottomDrawerContentState.UpdateCourse -> UpdateCourseUi(
+        GroupDetailsBottomDrawerContentState.UpdateCourse -> UpdateCourseUi(
             updateCourse = updateCourse,
             currentCourse = currentCourse
         )
+        GroupDetailsBottomDrawerContentState.DownloadVedomost -> DownloadVedomost(
+            groupId = groupId
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun DownloadVedomost(
+    groupId: Int
+) {
+
+    val context = LocalContext.current
+    var month by remember { mutableStateOf(Month.January) }
+    var year by remember { mutableStateOf(2023) }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(id = R.string.vedomost_month),
+            color = PgkTheme.colors.primaryText,
+            style = PgkTheme.typography.heading,
+            fontFamily = PgkTheme.fontFamily.fontFamily,
+            modifier = Modifier
+                .padding(5.dp)
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = stringResource(id = R.string.choose_moth),
+            color = PgkTheme.colors.primaryText,
+            style = PgkTheme.typography.heading,
+            fontFamily = PgkTheme.fontFamily.fontFamily,
+            modifier = Modifier.padding(10.dp)
+        )
+
+        LazyRow {
+            items(Month.values()){
+                if(it != Month.NotSet){
+                    Card(
+                        backgroundColor = PgkTheme.colors.secondaryBackground,
+                        elevation = 12.dp,
+                        shape = PgkTheme.shapes.cornersStyle,
+                        modifier = Modifier.padding(5.dp),
+                        border = if(month == it) BorderStroke(1.dp, PgkTheme.colors.tintColor) else null,
+                        onClick = { month = it }
+                    ) {
+                        Text(
+                            text = it.text,
+                            color = PgkTheme.colors.primaryText,
+                            style = PgkTheme.typography.body,
+                            fontFamily = PgkTheme.fontFamily.fontFamily,
+                            modifier = Modifier.padding(5.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        Text(
+            text = stringResource(id = R.string.choose_year),
+            color = PgkTheme.colors.primaryText,
+            style = PgkTheme.typography.heading,
+            fontFamily = PgkTheme.fontFamily.fontFamily,
+            modifier = Modifier.padding(10.dp)
+        )
+
+        LazyRow {
+            items((2023..2040).toList()){
+                Card(
+                    backgroundColor = PgkTheme.colors.secondaryBackground,
+                    elevation = 12.dp,
+                    shape = PgkTheme.shapes.cornersStyle,
+                    modifier = Modifier.padding(5.dp),
+                    border = if(year == it) BorderStroke(1.dp, PgkTheme.colors.tintColor) else null,
+                    onClick = { year = it }
+                ) {
+                    Text(
+                        text = it.toString(),
+                        color = PgkTheme.colors.primaryText,
+                        style = PgkTheme.typography.body,
+                        fontFamily = PgkTheme.fontFamily.fontFamily,
+                        modifier = Modifier.padding(5.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        TextButton(onClick = {
+            context.openBrowser(getVedomostAttendanceLink(groupId, month, year))
+        }) {
+            Text(
+                text = stringResource(id = R.string.download_vedomost),
+                color = PgkTheme.colors.tintColor,
+                style = PgkTheme.typography.body,
+                fontFamily = PgkTheme.fontFamily.fontFamily,
+                modifier = Modifier
+                    .padding(5.dp)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }
 

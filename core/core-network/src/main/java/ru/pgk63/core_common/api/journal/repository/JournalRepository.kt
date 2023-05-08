@@ -1,5 +1,6 @@
 package ru.pgk63.core_common.api.journal.repository
 
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData

@@ -1,4 +1,4 @@
-package ru.pgk63.core_model.deputyHeadma
+package ru.pgk63.core_model.raportichka
 
 import ru.pgk63.core_model.student.Student
 import ru.pgk63.core_model.subject.Subject
@@ -11,5 +11,6 @@ data class RaportichkaRow(
     val hours:Int = 2,
     val subject: Subject,
     val teacher:Teacher,
-    val student: Student
+    val student: Student,
+    val cause: RaportichkaCause = RaportichkaCause.PRIKAZ
 )

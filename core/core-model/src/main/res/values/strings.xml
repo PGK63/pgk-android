@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="STATEMENTS">Заявление</string>
+    <string name="SICKNESS">Болезнь</string>
+    <string name="ABSENTEEISM">Прогул</string>
+    <string name="PRIKAZ">Приказ</string>
+</resources>

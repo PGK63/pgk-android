@@ -128,6 +128,11 @@
     <string name="edit">Изменить</string>
     <string name="edit_email">Изменить электронную почту</string>
     <string name="delete">Удалить</string>
+    <string name="vedomost">Ведомость</string>
+    <string name="vedomost_month">Ведомость за месяц</string>
+    <string name="choose_year">Выберите год</string>
+    <string name="choose_moth">Выберите месяц</string>
+    <string name="download_vedomost">Загрузить ведомость</string>
     <string name="search">Поиск</string>
     <string name="search_iskat">Искать</string>
     <string name="page">Страница</string>
@@ -151,6 +156,7 @@
     <string name="updated">Обновления</string>
     <string name="hours">Часы</string>
     <string name="signature">Подпись</string>
+    <string name="cause">Причина</string>
     <string name="para">Пара</string>
     <string name="ok">Выбрать</string>
     <string name="cancel">Отмена</string>

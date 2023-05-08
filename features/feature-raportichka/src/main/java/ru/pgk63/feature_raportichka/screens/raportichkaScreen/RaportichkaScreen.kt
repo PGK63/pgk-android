@@ -31,6 +31,7 @@ import ru.pgk63.core_common.enums.user.UserRole
 import ru.pgk63.core_common.extension.launchWhenStarted
 import ru.pgk63.core_common.extension.parseToBaseDateFormat
 import ru.pgk63.core_database.user.model.UserLocalDatabase
+import ru.pgk63.core_model.raportichka.RaportichkaRow
 import ru.pgk63.core_ui.R
 import ru.pgk63.core_ui.theme.PgkTheme
 import ru.pgk63.core_ui.view.EmptyUi
@@ -506,7 +507,7 @@ private fun RaportichkaList(
     searchByGroupsId: List<Int>? = null,
     searchBySubjectsId: List<Int>? = null,
     searchByTeacherId: List<Int>? = null,
-    onClickRow:(row: ru.pgk63.core_model.deputyHeadma.RaportichkaRow) -> Unit
+    onClickRow:(row: RaportichkaRow) -> Unit
 ) {
     VerticalPager(
         count = raportichkaList.itemCount,

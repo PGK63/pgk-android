@@ -1,7 +1,7 @@
 package ru.pgk63.core_common.api.raportichka.model
 
 import ru.pgk63.core_model.group.Group
-import ru.pgk63.core_common.api.teacher.model.Teacher
+import ru.pgk63.core_model.raportichka.RaportichkaRow
 import java.util.Date
 
 data class RaportichkaResponse(
@@ -19,5 +19,5 @@ data class Raportichka(
     val date:Date,
     val rowsCount:Int,
     val group: Group,
-    val rows: List<ru.pgk63.core_model.deputyHeadma.RaportichkaRow>
+    val rows: List<RaportichkaRow>
 )

@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -23,9 +24,13 @@ import ru.pgk63.core_common.api.raportichka.model.RaportichkaAddRowBody
 import ru.pgk63.core_common.api.raportichka.model.RaportichkaUpdateRowBody
 import ru.pgk63.core_common.api.teacher.model.Teacher
 import ru.pgk63.core_common.common.response.Result
+import ru.pgk63.core_common.compose.rememberMutableStateListOf
 import ru.pgk63.core_common.enums.user.UserRole
 import ru.pgk63.core_common.extension.launchWhenStarted
 import ru.pgk63.core_database.user.model.UserLocalDatabase
+import ru.pgk63.core_model.raportichka.RaportichkaCause
+import ru.pgk63.core_model.student.Student
+import ru.pgk63.core_model.subject.Subject
 import ru.pgk63.core_ui.R
 import ru.pgk63.core_ui.theme.PgkTheme
 import ru.pgk63.core_ui.view.TextFieldBase
@@ -56,8 +61,10 @@ internal fun RaportichkaAddRowRoute(
     var countHours by remember { mutableStateOf(updateCountHours ?: "2") }
 
     var studentIdSelected by remember { mutableStateOf(updateStudentId) }
+    val studentsIdSelected = rememberMutableStateListOf<Int>()
     var subjectIdSelected by remember { mutableStateOf(updateSubjectId) }
     var teacherIdSelected by remember { mutableStateOf<Int?>(null) }
+    var causeSelected by remember { mutableStateOf(RaportichkaCause.STATEMENTS) }
 
     var studentSearchText by remember { mutableStateOf("") }
     var subjectSearchText by remember { mutableStateOf("") }
@@ -139,12 +146,15 @@ internal fun RaportichkaAddRowRoute(
         textTobBar = textTobBar,
         textTobBarVisible = textTobBarVisible,
         numberLesson = numberLesson,
+        raportichkaRowId = raportichkaRowId,
         countHours = countHours,
+        studentsIdSelected = studentsIdSelected,
         onBackScreen = onBackScreen,
         students = students,
         subjects = subjects,
         teachers = teachers,
         teachersListVisible = teachersListVisible,
+        causeSelected = causeSelected,
         studentIdSelected = studentIdSelected,
         subjectIdSelected = subjectIdSelected,
         teacherIdSelected = teacherIdSelected,
@@ -175,49 +185,54 @@ internal fun RaportichkaAddRowRoute(
         onTextCountHoursChange = {
             countHours = it
         },
-        onRaportichkaAddRow = {
-            if(raportichkaRowId != null && user.userRole != null){
-                if(user.userRole == UserRole.TEACHER){
-                    viewModel.updateRow(
-                        rowId = raportichkaRowId,
-                        body = RaportichkaUpdateRowBody(
-                            numberLesson = numberLesson.toInt(),
-                            hours = countHours.toInt(),
-                            subjectId = subjectIdSelected!!,
-                            studentId = studentIdSelected!!,
-                            raportichkaId = raportichkaId
-                        )
-                    )
-                }else if(user.userRole == UserRole.HEADMAN
-                    || user.userRole == UserRole.DEPUTY_HEADMAN
-                    || user.userRole == UserRole.ADMIN
-                ) {
-                    viewModel.updateRow(
-                        rowId = raportichkaRowId,
-                        body = ru.pgk63.core_model.headman.HeadmanUpdateRaportichkaRowBody(
-                            numberLesson = numberLesson.toInt(),
-                            hours = countHours.toInt(),
-                            subjectId = subjectIdSelected!!,
-                            studentId = studentIdSelected!!,
-                            teacherId = teacherIdSelected!!,
-                            raportichkaId = raportichkaId
-                        )
-                    )
-                }
-            }else {
-                viewModel.raportichkaAddRow(
-                    raportichkaId = raportichkaId,
-                    body = RaportichkaAddRowBody(
+        onCauseSelectedChange = {
+            causeSelected = it
+        }
+    ) {
+        if (raportichkaRowId != null && user.userRole != null) {
+            if (user.userRole == UserRole.TEACHER) {
+                viewModel.updateRow(
+                    rowId = raportichkaRowId,
+                    body = RaportichkaUpdateRowBody(
                         numberLesson = numberLesson.toInt(),
                         hours = countHours.toInt(),
                         subjectId = subjectIdSelected!!,
                         studentId = studentIdSelected!!,
-                        teacherId = teacherIdSelected!!
+                        raportichkaId = raportichkaId,
+                        cause = causeSelected
+                    )
+                )
+            } else if (user.userRole == UserRole.HEADMAN
+                || user.userRole == UserRole.DEPUTY_HEADMAN
+                || user.userRole == UserRole.ADMIN
+            ) {
+                viewModel.updateRow(
+                    rowId = raportichkaRowId,
+                    body = ru.pgk63.core_model.headman.HeadmanUpdateRaportichkaRowBody(
+                        numberLesson = numberLesson.toInt(),
+                        hours = countHours.toInt(),
+                        subjectId = subjectIdSelected!!,
+                        studentId = studentIdSelected!!,
+                        teacherId = teacherIdSelected!!,
+                        raportichkaId = raportichkaId,
+                        cause = causeSelected
                     )
                 )
             }
+        } else {
+            viewModel.raportichkaAddRow(
+                raportichkaId = raportichkaId,
+                body = RaportichkaAddRowBody(
+                    numberLesson = numberLesson.toInt(),
+                    hours = countHours.toInt(),
+                    subjectId = subjectIdSelected!!,
+                    studentId = studentsIdSelected,
+                    teacherId = teacherIdSelected!!,
+                    cause = causeSelected
+                )
+            )
         }
-    )
+    }
 }
 
 @Composable
@@ -225,12 +240,16 @@ private fun CreateRaportichkaScreen(
     scaffoldState: ScaffoldState,
     textTobBar: String,
     textTobBarVisible: Boolean,
-    numberLesson:String,
-    countHours:String,
-    onTextNumberLessonChange:(String) -> Unit,
-    onTextCountHoursChange:(String) -> Unit,
-    students: LazyPagingItems<ru.pgk63.core_model.student.Student>,
-    subjects: LazyPagingItems<ru.pgk63.core_model.subject.Subject>,
+    studentsIdSelected: SnapshotStateList<Int>,
+    raportichkaRowId: Int?,
+    numberLesson: String,
+    countHours: String,
+    causeSelected: RaportichkaCause,
+    onCauseSelectedChange: (RaportichkaCause) -> Unit,
+    onTextNumberLessonChange: (String) -> Unit,
+    onTextCountHoursChange: (String) -> Unit,
+    students: LazyPagingItems<Student>,
+    subjects: LazyPagingItems<Subject>,
     teachers: LazyPagingItems<Teacher>,
     teachersListVisible: Boolean,
     studentIdSelected: Int?,
@@ -245,8 +264,8 @@ private fun CreateRaportichkaScreen(
     onStudentSearchTextChange: (String) -> Unit,
     onSubjectSearchTextChange: (String) -> Unit,
     onTeacherSearchTextChange: (String) -> Unit,
-    onBackScreen:() -> Unit,
-    onRaportichkaAddRow: () -> Unit
+    onBackScreen: () -> Unit,
+    onRaportichkaAddRow: () -> Unit,
 ) {
     val scrollBehavior = rememberToolbarScrollBehavior()
 
@@ -357,14 +376,40 @@ private fun CreateRaportichkaScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 SortingItem(
-                    title = stringResource(id = R.string.student),
+                    title = stringResource(id = R.string.cause),
+                    content = RaportichkaCause.values().toList(),
+                    selectedItem = {
+                        causeSelected == it
+                    },
+                    onClickItem = onCauseSelectedChange
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                SortingItem(
+                    title = if(raportichkaRowId != null)
+                        stringResource(id = R.string.student)
+                    else
+                        stringResource(id = R.string.students),
                     content = students,
                     searchText = studentSearchText,
                     selectedItem = { student ->
-                        student.id == studentIdSelected
+                        if(raportichkaRowId != null){
+                            student.id == studentIdSelected
+                        }else {
+                            student.id in studentsIdSelected
+                        }
                     },
                     onClickItem = { student ->
-                        onClickStudentItem(student.id)
+                        if(raportichkaRowId != null){
+                            if(student.id in studentsIdSelected){
+                                studentsIdSelected.remove(student.id)
+                            }else {
+                                studentsIdSelected.add(student.id)
+                            }
+                        }else {
+                            onClickStudentItem(student.id)
+                        }
                     },
                     onSearchTextChange = onStudentSearchTextChange
                 )

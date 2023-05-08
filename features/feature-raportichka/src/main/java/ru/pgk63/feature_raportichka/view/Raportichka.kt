@@ -14,12 +14,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ru.pgk63.core_model.department.Department
 import ru.pgk63.core_model.departmentHead.DepartmentHead
-import ru.pgk63.core_model.deputyHeadma.RaportichkaRow
+import ru.pgk63.core_model.raportichka.RaportichkaRow
 import ru.pgk63.core_model.group.Group
 import ru.pgk63.core_common.api.speciality.model.Specialization
 import ru.pgk63.core_model.student.Student
 import ru.pgk63.core_model.subject.Subject
 import ru.pgk63.core_common.api.teacher.model.Teacher
+import ru.pgk63.core_model.raportichka.RaportichkaCause
 import ru.pgk63.core_ui.theme.MainTheme
 import ru.pgk63.core_ui.theme.PgkTheme
 import ru.pgk63.core_ui.R
@@ -43,7 +44,7 @@ internal fun BoxScope.RaportichkaTable(
         modifier = modifier.matchParentSize(),
         rowModifier = Modifier.height(IntrinsicSize.Min),
         verticalLazyListState = verticalLazyListState,
-        columnCount = 5,
+        columnCount = 6,
         rowCount = sortedRows.size + 1,
     ){ columnIndex, rowIndex ->
         if(rowIndex == 0){
@@ -53,7 +54,8 @@ internal fun BoxScope.RaportichkaTable(
                     1 -> stringResource(id = R.string.student)
                     2 -> stringResource(id = R.string.subject)
                     3 -> stringResource(id = R.string.hours)
-                    4 -> stringResource(id = R.string.signature)
+                    4 -> stringResource(id = R.string.cause)
+                    5 -> stringResource(id = R.string.signature)
                     else -> ""
                 },
                 modifier = Modifier.fillMaxSize(),
@@ -85,17 +87,18 @@ internal fun BoxScope.RaportichkaTable(
                     1 -> "${row.student.fioAbbreviated()}\n(${row.student.group})"
                     2 -> "${row.subject.subjectTitle}\n(${row.teacher.fioAbbreviated()})"
                     3 -> row.hours.toString()
-                    4 -> if(row.confirmation) "✔️" else "❌"
+                    4 -> stringResource(id = row.cause.text)
+                    5 -> if(row.confirmation) "✔️" else "❌"
                     else -> ""
                 },
                 modifier = Modifier.fillMaxSize(),
                 borderColor = borderColor,
                 borderDp = borderDp,
-                shape = if(rowIndex == sortedRows.size && (columnIndex == 0 || columnIndex == 4))
+                shape = if(rowIndex == sortedRows.size && (columnIndex == 0 || columnIndex == 5))
                     AbsoluteRoundedCornerShape(
                         topLeft = 0.dp,
                         topRight = 0.dp,
-                        bottomRight = if(columnIndex == 4) 10.dp else 0.dp,
+                        bottomRight = if(columnIndex == 5) 10.dp else 0.dp,
                         bottomLeft = if(columnIndex == 0) 10.dp else 0.dp
                     )
                 else
@@ -178,7 +181,7 @@ private fun RaportichkaTable() {
         group = Group(
             id = 1,
             course = 2,
-            number = 39,
+            number = "39",
             speciality = specialization,
             classroomTeacher = teacher,
         )
@@ -190,21 +193,24 @@ private fun RaportichkaTable() {
             confirmation = true,
             subject = subject,
             teacher = teacher,
-            student = student
+            student = student,
+            cause = RaportichkaCause.PRIKAZ
         ),
         RaportichkaRow(
             numberLesson = 1,
             confirmation = true,
             subject = subject,
             teacher = teacher,
-            student = student
+            student = student,
+            cause = RaportichkaCause.PRIKAZ
         ),
         RaportichkaRow(
             numberLesson = 1,
             confirmation = true,
             subject = subject,
             teacher = teacher,
-            student = student
+            student = student,
+            cause = RaportichkaCause.PRIKAZ
         )
     )
 
