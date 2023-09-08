@@ -6,7 +6,7 @@ enum class Month(val text: String) {
     February("Февраль"),
     March("Март"),
     April("Апрель"),
-    May("May"),
+    May("Май"),
     June("Июнь"),
     July("Июль"),
     August("Август"),

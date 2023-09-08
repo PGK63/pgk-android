@@ -459,6 +459,35 @@ private fun DownloadVedomost(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
+            text = stringResource(id = R.string.choose_year),
+            color = PgkTheme.colors.primaryText,
+            style = PgkTheme.typography.heading,
+            fontFamily = PgkTheme.fontFamily.fontFamily,
+            modifier = Modifier.padding(10.dp)
+        )
+
+        LazyRow {
+            items((2023..2040).toList()){
+                Card(
+                    backgroundColor = PgkTheme.colors.secondaryBackground,
+                    elevation = 12.dp,
+                    shape = PgkTheme.shapes.cornersStyle,
+                    modifier = Modifier.padding(5.dp),
+                    border = if(year == it) BorderStroke(1.dp, PgkTheme.colors.tintColor) else null,
+                    onClick = { year = it }
+                ) {
+                    Text(
+                        text = it.toString(),
+                        color = PgkTheme.colors.primaryText,
+                        style = PgkTheme.typography.body,
+                        fontFamily = PgkTheme.fontFamily.fontFamily,
+                        modifier = Modifier.padding(5.dp)
+                    )
+                }
+            }
+        }
+
+        Text(
             text = stringResource(id = R.string.choose_moth),
             color = PgkTheme.colors.primaryText,
             style = PgkTheme.typography.heading,
@@ -485,35 +514,6 @@ private fun DownloadVedomost(
                             modifier = Modifier.padding(5.dp)
                         )
                     }
-                }
-            }
-        }
-
-        Text(
-            text = stringResource(id = R.string.choose_year),
-            color = PgkTheme.colors.primaryText,
-            style = PgkTheme.typography.heading,
-            fontFamily = PgkTheme.fontFamily.fontFamily,
-            modifier = Modifier.padding(10.dp)
-        )
-
-        LazyRow {
-            items((2023..2040).toList()){
-                Card(
-                    backgroundColor = PgkTheme.colors.secondaryBackground,
-                    elevation = 12.dp,
-                    shape = PgkTheme.shapes.cornersStyle,
-                    modifier = Modifier.padding(5.dp),
-                    border = if(year == it) BorderStroke(1.dp, PgkTheme.colors.tintColor) else null,
-                    onClick = { year = it }
-                ) {
-                    Text(
-                        text = it.toString(),
-                        color = PgkTheme.colors.primaryText,
-                        style = PgkTheme.typography.body,
-                        fontFamily = PgkTheme.fontFamily.fontFamily,
-                        modifier = Modifier.padding(5.dp)
-                    )
                 }
             }
         }

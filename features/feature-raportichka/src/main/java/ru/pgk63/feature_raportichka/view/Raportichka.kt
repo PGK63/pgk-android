@@ -59,10 +59,10 @@ internal fun BoxScope.RaportichkaTable(
                     else -> ""
                 },
                 modifier = Modifier.fillMaxSize(),
-                shape = if(columnIndex == 0 || columnIndex == 4)
+                shape = if(columnIndex == 0 || columnIndex == 5)
                     AbsoluteRoundedCornerShape(
                         topLeft = if(columnIndex == 0) 10.dp else 0.dp,
-                        topRight = if(columnIndex == 4) 10.dp else 0.dp,
+                        topRight = if(columnIndex == 5) 10.dp else 0.dp,
                         bottomRight = 0.dp,
                         bottomLeft = 0.dp
                     )
@@ -87,7 +87,7 @@ internal fun BoxScope.RaportichkaTable(
                     1 -> "${row.student.fioAbbreviated()}\n(${row.student.group})"
                     2 -> "${row.subject.subjectTitle}\n(${row.teacher.fioAbbreviated()})"
                     3 -> row.hours.toString()
-                    4 -> stringResource(id = row.cause.text)
+                    4 -> stringResource(id = ru.pgk63.core_model.R.string.ABSENTEEISM) // stringResource(id = row.cause.text)
                     5 -> if(row.confirmation) "✔️" else "❌"
                     else -> ""
                 },

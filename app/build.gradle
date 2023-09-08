@@ -5,6 +5,7 @@ plugins {
     id 'com.google.dagger.hilt.android'
     id 'com.google.gms.google-services'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.8.10'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -81,6 +82,7 @@ dependencies {
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation "androidx.compose.material:material:$compose_material"
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.4.1'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'

@@ -217,6 +217,7 @@ fun<T : Any> SortingItem(
     onSearchTextChange: ((String) -> Unit)? = null,
     onClickItem: (T) -> Unit = {},
     selectedItem: (T) -> Boolean = { false },
+    onItemToText: @Composable (T) -> String = { it.toString() }
 ) {
     val scope = rememberCoroutineScope()
 
@@ -286,7 +287,7 @@ fun<T : Any> SortingItem(
                     onClick = { onClickItem(item) }
                 ) {
                     Text(
-                        text = item.toString(),
+                        text = onItemToText.invoke(item),
                         color = PgkTheme.colors.primaryText,
                         style = PgkTheme.typography.body,
                         fontFamily = PgkTheme.fontFamily.fontFamily,

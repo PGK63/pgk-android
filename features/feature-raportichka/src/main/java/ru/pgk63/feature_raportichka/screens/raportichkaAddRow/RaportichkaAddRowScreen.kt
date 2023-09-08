@@ -81,12 +81,10 @@ internal fun RaportichkaAddRowRoute(
     else
         stringResource(id = R.string.add)
 
-    val textTobBarVisible = if(raportichkaRowId != null && user.userRole == UserRole.TEACHER)
-            studentIdSelected != null && subjectIdSelected != null &&
-                numberLesson.isNotEmpty() && countHours.isNotEmpty()
-        else
-            studentIdSelected != null && subjectIdSelected != null &&
-                teacherIdSelected != null && numberLesson.isNotEmpty() && countHours.isNotEmpty()
+    val textTobBarVisible = (if(raportichkaRowId == null) studentsIdSelected.isNotEmpty()
+            else studentIdSelected != null) && subjectIdSelected != null &&
+            numberLesson.isNotEmpty() && countHours.isNotEmpty()
+            && (if(user.userRole == UserRole.TEACHER) true else teacherIdSelected != null)
 
     val teachersListVisible = if(raportichkaRowId != null){
         user.userRole != null && user.userRole != UserRole.TEACHER
@@ -378,10 +376,9 @@ private fun CreateRaportichkaScreen(
                 SortingItem(
                     title = stringResource(id = R.string.cause),
                     content = RaportichkaCause.values().toList(),
-                    selectedItem = {
-                        causeSelected == it
-                    },
-                    onClickItem = onCauseSelectedChange
+                    selectedItem = { causeSelected == it },
+                    onClickItem = onCauseSelectedChange,
+                    onItemToText = { stringResource(id = it.text) }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -402,13 +399,13 @@ private fun CreateRaportichkaScreen(
                     },
                     onClickItem = { student ->
                         if(raportichkaRowId != null){
+                            onClickStudentItem(student.id)
+                        }else {
                             if(student.id in studentsIdSelected){
                                 studentsIdSelected.remove(student.id)
                             }else {
                                 studentsIdSelected.add(student.id)
                             }
-                        }else {
-                            onClickStudentItem(student.id)
                         }
                     },
                     onSearchTextChange = onStudentSearchTextChange

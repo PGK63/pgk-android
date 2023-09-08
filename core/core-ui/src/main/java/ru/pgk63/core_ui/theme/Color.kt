@@ -10,7 +10,7 @@ val baseLightPalette = PgkColors(
     tintColor = Color.Magenta,
     controlColor = Color(0xFF7A8A99),
     drawerBackground = Color(0xFFFFFFFF),
-    journalColor = Color(0xFF0324A5),
+    journalColor = Color(0xFF205798),
     errorColor = Color(0xFFFF3377),
 )
 
@@ -22,7 +22,7 @@ val baseDarkPalette = PgkColors(
     tintColor = Color.Magenta,
     controlColor = Color(0xFF7A8A99),
     drawerBackground = Color(0xFF0F0F0F),
-    journalColor = Color(0xFF0324A5),
+    journalColor = Color(0xFF205798),
     errorColor = Color(0xFFFF6699)
 )
 
